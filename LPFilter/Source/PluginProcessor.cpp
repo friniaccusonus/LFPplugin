@@ -109,6 +109,7 @@ void LpfilterAudioProcessor::releaseResources()
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool LpfilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
+/*
   #if JucePlugin_IsMidiEffect
     ignoreUnused (layouts);
     return true;
@@ -127,6 +128,9 @@ bool LpfilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 
     return true;
   #endif
+ */
+    // Input and Output must have the same layout
+    
 }
 #endif
 
