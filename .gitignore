@@ -1,0 +1,10 @@
+*.exe
+*.zip
+*.pdf
+
+# OSX
+*.DS_Store
+
+# Xcode
+Builds/
+
