@@ -25,6 +25,8 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
                        ) // Sets Input and Output bus to be stereo by default
 #endif
 {
+    // Add parameters
+    addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -140,20 +142,17 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
+    // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        float* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+        buffer.applyGain(*gain);
     }
 }
 
 //==============================================================================
 bool LpfilterAudioProcessor::hasEditor() const
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    return false; // (change this to false if you choose to not supply an editor)
 }
 
 AudioProcessorEditor* LpfilterAudioProcessor::createEditor()
