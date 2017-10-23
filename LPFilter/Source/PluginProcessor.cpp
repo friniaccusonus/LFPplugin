@@ -27,6 +27,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
 {
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
+    addParameter(frequency = new AudioParameterInt("frequency", "Hz", 60, 10000, 60));
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -152,7 +153,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 //==============================================================================
 bool LpfilterAudioProcessor::hasEditor() const
 {
-    return false; // (change this to false if you choose to not supply an editor)
+    return true; // (change this to false if you choose to not supply an editor)
 }
 
 AudioProcessorEditor* LpfilterAudioProcessor::createEditor()
