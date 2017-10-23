@@ -169,7 +169,7 @@ void LpfilterAudioProcessor::process(dsp::ProcessContextReplacing<float> context
 //==============================================================================
 bool LpfilterAudioProcessor::hasEditor() const
 {
-    return false; // (change this to false if you choose to not supply an editor)
+    return true; // (change this to false if you choose to not supply an editor)
 }
 
 AudioProcessorEditor* LpfilterAudioProcessor::createEditor()
