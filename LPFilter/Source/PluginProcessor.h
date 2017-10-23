@@ -55,11 +55,17 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    //==============================================================================
+    void updateParameters();
 
 private:
+    
     //==============================================================================
     AudioParameterFloat* gain;
-    AudioParameterInt* frequency;
+    AudioParameterFloat* frequency;
+    
+    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };
