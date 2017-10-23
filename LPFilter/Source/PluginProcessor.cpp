@@ -152,10 +152,16 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     // this code if your algorithm always overwrites all the output channels.
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         ioBuffer.clear (i, 0, ioBuffer.getNumSamples());
-
     
     // Define the block that passes into process function
     dsp::AudioBlock<float> block (ioBuffer);
+    
+    //Update frequency parameter
+    updateParameters();
+    
+    //Apply lpfJuce filter
+    lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
+    
     
     
     // Apply gain
@@ -165,10 +171,9 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     }
 }
 
-void LpfilterAudioProcessor::process(dsp::ProcessContextReplacing<float> context) noexcept
+void LpfilterAudioProcessor::updateParameters()
 {
-    // lpfJuce processing takes place here
-    lpfJuce.process (context);
+    *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(getSampleRate(), *frequency);
 }
 
 //==============================================================================

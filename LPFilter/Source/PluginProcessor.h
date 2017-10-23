@@ -55,9 +55,11 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    //==============================================================================
+    void updateParameters();
 
 private:
-    void process (dsp::ProcessContextReplacing<float>) noexcept;
     
     //==============================================================================
     AudioParameterFloat* gain;
