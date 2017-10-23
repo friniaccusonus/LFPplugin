@@ -22,7 +22,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ) // Sets Input and Output bus to be stereo by default
 #endif
 {
 }
@@ -109,24 +109,19 @@ void LpfilterAudioProcessor::releaseResources()
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool LpfilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
-    return true;
-  #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
-        return false;
-
+    const AudioChannelSet& mainInput = layouts.getMainInputChannelSet();
+    const AudioChannelSet& mainOutput = layouts.getMainOutputChannelSet();
+    
     // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+    if ( mainInput != mainOutput )
         return false;
-   #endif
-
+    
+    // Check for only mono or stereo layout
+    if ( mainInput.size() > 2 )
+        return false;
+    
     return true;
-  #endif
+    
 }
 #endif
 
