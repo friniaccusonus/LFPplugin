@@ -105,8 +105,12 @@ void LpfilterAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    // Get the number of channels
+    auto channels = static_cast<uint32> (getMainBusNumInputChannels());
+    
+    // Prepare lpfJuce filter
+    dsp::ProcessSpec spec {sampleRate, static_cast<uint32>(samplesPerBlock), channels};
+    lpfJuce.prepare(spec);
 }
 
 void LpfilterAudioProcessor::releaseResources()
@@ -157,13 +161,14 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        ioBuffer.applyGain(*gain);
+        ioBuffer.applyGain (*gain);
     }
 }
 
 void LpfilterAudioProcessor::process(dsp::ProcessContextReplacing<float> context) noexcept
 {
     // lpfJuce processing takes place here
+    lpfJuce.process (context);
 }
 
 //==============================================================================
