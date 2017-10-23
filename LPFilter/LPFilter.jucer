@@ -30,12 +30,12 @@
                        osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"
                        cppLibType="libc++" binaryPath="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"
                        xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"
-                       libraryPath="~/AccusonusProjects/DSPFilters/shared/DSPFilters/include/DspFilters&#10;~/AccusonusProjects/DSPFilters/shared/DSPFilters/source"/>
+                       libraryPath="/Users/frini/AccusonusProjects/DSPFilters/Lib/Debug/"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="LPFilter"
                        osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"
                        cppLibType="libc++" binaryPath="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"
                        xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"
-                       libraryPath="~/AccusonusProjects/DSPFilters/shared/DSPFilters/include/DspFilters&#10;~/AccusonusProjects/DSPFilters/shared/DSPFilters/source"/>
+                       libraryPath="/Users/frini/AccusonusProjects/DSPFilters/Lib/Release/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../SDKs/JuceLibrary/5.1.2/modules"/>
