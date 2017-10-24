@@ -26,16 +26,18 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
                      #endif
                        ),
         // Setup lpfJuce
-        lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, 60.f))
+        lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, 60.f)),
+        //Setup filter with DSPFilters lib
+        lpfDspLib(new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>)
                        
 #endif
 {
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
+    paramsDsp[0] = 44100.0; paramsDsp[1] = 1; paramsDsp[2] = 60.f;
     
-    //Set filter with DSPFilters lib
-    Dsp::Filter* f = new Dsp::SmoothedFilterDesign<Dsp::RBJ::Design::LowPass, 2> (1024);
+    
     
 }
 
@@ -114,6 +116,9 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     // Prepare lpfJuce filter
     dsp::ProcessSpec spec {sampleRate, static_cast<uint32>(samplesPerBlock), channels};
     lpfJuce.prepare(spec);
+    
+    // Prepare lpfDspLib filter
+    lpfDspLib->setParams(paramsDsp);
 }
 
 void LpfilterAudioProcessor::releaseResources()
