@@ -25,26 +25,17 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
                        ),
-<<<<<<< HEAD
-        //Setup filter with DSPFilters lib
-        lpfDspLib(new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>)
-                       
-=======
->>>>>>> issue-#6
 #endif
         // Setup lpfJuce
         lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFreq))
+
 {
+    //Setup filter with DSPFilters lib
+    lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>;
+    
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
-<<<<<<< HEAD
-    paramsDsp[0] = 44100.0; paramsDsp[1] = 1; paramsDsp[2] = 60.f;
-    
-=======
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
->>>>>>> issue-#6
-    
-    
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -124,6 +115,7 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     lpfJuce.prepare(spec);
     
     // Prepare lpfDspLib filter
+    paramsDsp[0] = sampleRate; paramsDsp[1] = 1; paramsDsp[2] = defaultFreq;
     lpfDspLib->setParams(paramsDsp);
 }
 
@@ -167,13 +159,10 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         ioBuffer.clear (i, 0, ioBuffer.getNumSamples());
     
-    // Define the block that passes into process function
-    dsp::AudioBlock<float> block (ioBuffer);
-    
     //Update frequency parameter
     updateParameters();
     
-    process (dsp::ProcessContextReplacing<float> (block));
+    process (ioBuffer);
     
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -182,15 +171,24 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     }
 }
 
-void LpfilterAudioProcessor::process(dsp::ProcessContextReplacing<float> context) noexcept
+void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
 {
+    // Define the block that passes into process function
+    dsp::AudioBlock<float> block (processBuffer);
+    
     // lpfJuce filter processing
-    lpfJuce.process(context);
+   // lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
+    
+    
+    lpfDspLib->process(processBuffer.getNumSamples(), processBuffer.getArrayOfWritePointers());
 }
 
 void LpfilterAudioProcessor::updateParameters()
 {
     *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(getSampleRate(), *frequency);
+    
+    paramsDsp[2] = frequency->get();
+    lpfDspLib->setParams(paramsDsp);
 }
 
 //==============================================================================

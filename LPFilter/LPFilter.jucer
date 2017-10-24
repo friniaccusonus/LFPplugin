@@ -20,7 +20,7 @@
       <FILE id="hAt2hJ" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="odN3kd" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="Rjy81e" name="DspFilters.cpp" compile="1" resource="0" file="Source/DspFilters.cpp"/>
+      <FILE id="o0T1Zn" name="Dsp.h" compile="0" resource="0" file="../../DSPFilters/shared/DSPFilters/include/DspFilters/Dsp.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

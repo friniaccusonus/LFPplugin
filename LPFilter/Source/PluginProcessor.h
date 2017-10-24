@@ -61,19 +61,17 @@ public:
 
 private:
     
-    void process (dsp::ProcessContextReplacing<float>) noexcept;
+    void process (AudioSampleBuffer& buffer) noexcept;
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
-<<<<<<< HEAD
+
     Dsp::Params paramsDsp;
-=======
     float defaultFreq = 60.f;
->>>>>>> issue-#6
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     
-    Dsp::Filter* lpfDspLib;
+    ScopedPointer<Dsp::Filter> lpfDspLib;
     
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
