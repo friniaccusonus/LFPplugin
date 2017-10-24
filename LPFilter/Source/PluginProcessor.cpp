@@ -18,16 +18,21 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
+                       // Sets Input and Output bus to be stereo by default
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       ) // Sets Input and Output bus to be stereo by default
+                       ),
 #endif
+        // Setup lpfJuce
+        lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFreq))
 {
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
-    addParameter(frequency = new AudioParameterInt("frequency", "Hz", 60, 10000, 60));
+    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
+    
+    
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -99,8 +104,12 @@ void LpfilterAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    // Get the number of channels
+    auto channels = static_cast<uint32> (getMainBusNumInputChannels());
+    
+    // Prepare lpfJuce filter
+    dsp::ProcessSpec spec {sampleRate, static_cast<uint32>(samplesPerBlock), channels};
+    lpfJuce.prepare(spec);
 }
 
 void LpfilterAudioProcessor::releaseResources()
@@ -128,7 +137,7 @@ bool LpfilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 }
 #endif
 
-void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
     const int totalNumInputChannels  = getTotalNumInputChannels();
@@ -141,13 +150,32 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
+        ioBuffer.clear (i, 0, ioBuffer.getNumSamples());
+    
+    // Define the block that passes into process function
+    dsp::AudioBlock<float> block (ioBuffer);
+    
+    //Update frequency parameter
+    updateParameters();
+    
+    process (dsp::ProcessContextReplacing<float> (block));
+    
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        buffer.applyGain(*gain);
+        ioBuffer.applyGain (*gain);
     }
+}
+
+void LpfilterAudioProcessor::process(dsp::ProcessContextReplacing<float> context) noexcept
+{
+    // lpfJuce filter processing
+    lpfJuce.process(context);
+}
+
+void LpfilterAudioProcessor::updateParameters()
+{
+    *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(getSampleRate(), *frequency);
 }
 
 //==============================================================================
