@@ -10,6 +10,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "DspFilters/Dsp.h"
 
 
 //==============================================================================
@@ -33,6 +34,8 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
     
+    //Set filter with DSPFilters lib
+    Dsp::Filter* f = new Dsp::SmoothedFilterDesign<Dsp::RBJ::Design::LowPass, 2> (1024);
     
 }
 
