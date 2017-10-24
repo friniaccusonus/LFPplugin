@@ -25,18 +25,24 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
                        ),
-        // Setup lpfJuce
-        lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, 60.f)),
+<<<<<<< HEAD
         //Setup filter with DSPFilters lib
         lpfDspLib(new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>)
                        
+=======
+>>>>>>> issue-#6
 #endif
+        // Setup lpfJuce
+        lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFreq))
 {
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
-    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
+<<<<<<< HEAD
     paramsDsp[0] = 44100.0; paramsDsp[1] = 1; paramsDsp[2] = 60.f;
     
+=======
+    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
+>>>>>>> issue-#6
     
     
 }
@@ -167,16 +173,19 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     //Update frequency parameter
     updateParameters();
     
-    //Apply lpfJuce filter
-    lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
-    
-    
+    process (dsp::ProcessContextReplacing<float> (block));
     
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         ioBuffer.applyGain (*gain);
     }
+}
+
+void LpfilterAudioProcessor::process(dsp::ProcessContextReplacing<float> context) noexcept
+{
+    // lpfJuce filter processing
+    lpfJuce.process(context);
 }
 
 void LpfilterAudioProcessor::updateParameters()
