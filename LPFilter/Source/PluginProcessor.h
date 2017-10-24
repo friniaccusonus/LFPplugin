@@ -66,6 +66,7 @@ private:
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
     IIRCoefficients      iirCoef;
+    AudioParameterChoice* mode;
 
     Dsp::Params paramsDsp;
     float defaultFreq = 60.f;

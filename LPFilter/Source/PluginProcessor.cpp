@@ -37,6 +37,8 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
+    addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
+    
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -185,9 +187,13 @@ void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
     // Define the block that passes into process function
     dsp::AudioBlock<float> block (processBuffer);
     
+    if (mode->getIndex() == 0)
+    {
     // lpfJuce filter processing
    // lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
-    
+    }
+    else if (mode->getIndex() == 1)
+    {
     // lpfDspLib filter processing
     /*
     if (getTotalNumInputChannels() < 2 )
@@ -205,11 +211,14 @@ void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
         lpfDspLib->process(processBuffer.getNumSamples(), processBuffer.getArrayOfWritePointers());
     }
      */
-    
-    // Custom filter processing
-    for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
+    }
+    else
     {
-        
+        // Custom filter processing
+        for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
+        {
+            
+        }
     }
 }
 
