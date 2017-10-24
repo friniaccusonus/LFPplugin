@@ -61,9 +61,11 @@ public:
 
 private:
     
+    void process (dsp::ProcessContextReplacing<float>) noexcept;
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
+    float defaultFreq = 60.f;
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     
