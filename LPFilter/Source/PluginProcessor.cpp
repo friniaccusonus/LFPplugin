@@ -33,6 +33,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     //Setup filter with DSPFilters lib
     lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>;
     
+    
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
@@ -118,6 +119,9 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     paramsDsp[0] = sampleRate; paramsDsp[1] = 1; paramsDsp[2] = defaultFreq;
     lpfDspLib->setParams(paramsDsp);
     
+    // Set up custom LPF coefficients
+    iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
+    
     if (getTotalNumInputChannels() < 2 )
     {
         tempBuffer.setSize(2, samplesPerBlock);
@@ -184,6 +188,8 @@ void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
     // lpfJuce filter processing
    // lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
     
+    // lpfDspLib filter processing
+    /*
     if (getTotalNumInputChannels() < 2 )
     {
         tempBuffer.copyFrom(0, *tempBuffer.getReadPointer(0), processBuffer.getReadPointer(0), processBuffer.getNumSamples());
@@ -198,14 +204,26 @@ void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
     {
         lpfDspLib->process(processBuffer.getNumSamples(), processBuffer.getArrayOfWritePointers());
     }
+     */
+    
+    // Custom filter processing
+    for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
+    {
+        
+    }
 }
 
 void LpfilterAudioProcessor::updateParameters()
 {
+    // Update lpfJuce
     *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(getSampleRate(), *frequency);
     
+    // Update lpfDspLib
     paramsDsp[2] = frequency->get();
     lpfDspLib->setParams(paramsDsp);
+    
+    // Update custom filter coeffiecients
+     iirCoef = IIRCoefficients::makeLowPass(getSampleRate(), *frequency);
 }
 
 //==============================================================================
