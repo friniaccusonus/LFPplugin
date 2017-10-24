@@ -117,6 +117,11 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     // Prepare lpfDspLib filter
     paramsDsp[0] = sampleRate; paramsDsp[1] = 1; paramsDsp[2] = defaultFreq;
     lpfDspLib->setParams(paramsDsp);
+    
+    if (getTotalNumInputChannels() < 2 )
+    {
+        tempBuffer.setSize(2, samplesPerBlock);
+    }
 }
 
 void LpfilterAudioProcessor::releaseResources()
@@ -179,8 +184,20 @@ void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
     // lpfJuce filter processing
    // lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
     
+    if (getTotalNumInputChannels() < 2 )
+    {
+        tempBuffer.copyFrom(0, *tempBuffer.getReadPointer(0), processBuffer.getReadPointer(0), processBuffer.getNumSamples());
+        tempBuffer.copyFrom(1, *tempBuffer.getReadPointer(1), processBuffer.getReadPointer(0), processBuffer.getNumSamples());
     
-    lpfDspLib->process(processBuffer.getNumSamples(), processBuffer.getArrayOfWritePointers());
+        lpfDspLib->process(tempBuffer.getNumSamples(), tempBuffer.getArrayOfWritePointers());
+        
+        processBuffer.copyFrom(0, *processBuffer.getWritePointer(0), tempBuffer.getWritePointer(0), tempBuffer.getNumSamples());
+        
+    }
+    else
+    {
+        lpfDspLib->process(processBuffer.getNumSamples(), processBuffer.getArrayOfWritePointers());
+    }
 }
 
 void LpfilterAudioProcessor::updateParameters()
