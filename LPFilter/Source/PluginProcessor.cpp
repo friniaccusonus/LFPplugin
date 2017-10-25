@@ -286,6 +286,13 @@ void LpfilterAudioProcessor::getStateInformation (MemoryBlock& destData)
     XmlElement xml ("MYPLUGINSETTINGS");
     
     //Store parameter values
+    for (auto* paramArray : getParameters())
+    {
+        if (auto* p = dynamic_cast<AudioProcessorParameterWithID*>(paramArray))
+            xml.setAttribute(p->paramID, p->getValue());
+    }
+    
+    copyXmlToBinary(xml, destData);
     
 }
 
@@ -293,6 +300,26 @@ void LpfilterAudioProcessor::setStateInformation (const void* data, int sizeInBy
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    
+    // ScopedPointer !!
+    ScopedPointer<XmlElement> xmlState (getXmlFromBinary(data, sizeInBytes));
+    
+    if (xmlState != nullptr)
+    {
+        // Check if it's the same xml that was saved before
+        if (xmlState->hasTagName("MYPLUGINSETTINGS"))
+        {
+            // Restore the parameters
+            for (auto* paramArray : getParameters())
+            {
+                if (auto* p = dynamic_cast<AudioProcessorParameterWithID*>(paramArray))
+                {
+                    float attributeValue = xmlState->getDoubleAttribute(p->paramID, p->getValue());
+                    p->setValue(attributeValue);
+                }
+            }
+        }
+    }
 }
 
 //==============================================================================
