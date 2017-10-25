@@ -38,7 +38,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
     addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
-    
+    addParameter(bypass = new AudioParameterBool("bypas", "Bypass", false));
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -178,13 +178,16 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     //Update frequency parameter
     updateParameters();
     
-    // The filtering process happens here
-    process (ioBuffer);
-    
-    // Apply gain
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    if (! *bypass)
     {
-        ioBuffer.applyGain (*gain);
+        // The filtering process happens here
+        process (ioBuffer);
+        
+        // Apply gain
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            ioBuffer.applyGain (*gain);
+        }
     }
 }
 
