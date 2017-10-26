@@ -76,7 +76,6 @@ private:
     
     ScopedPointer<Dsp::Filter> lpfDspLib;
     
-    AudioSampleBuffer tempBuffer;
     AudioSampleBuffer prevBuffer;
     
     
