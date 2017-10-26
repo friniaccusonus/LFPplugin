@@ -33,6 +33,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     //Setup filter with DSPFilters lib
     lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>;
     
+    
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
@@ -120,8 +121,17 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     paramsDsp[2] = defaultFreq;     // cut-off frequency
     lpfDspLib->setParams(paramsDsp);
     
+
+    // Set up custom LPF coefficients
+    iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
+    
+    // Set up previous buffer for custom filter
+    prevBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
+    prevBuffer.clear();
+
     filteredBuffer.setSize(2, samplesPerBlock);
 }
+
 
 void LpfilterAudioProcessor::releaseResources()
 {
@@ -163,6 +173,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         ioBuffer.clear (i, 0, ioBuffer.getNumSamples());
     
+    
     //Update frequency parameter
     updateParameters();
     
@@ -173,6 +184,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     dspFiltersProcess (ioBuffer);
     
     // Filtering with custom filter
+    customProcess(ioBuffer);
     
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -211,15 +223,54 @@ void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer
         // copy data to the output buffer
         processBuffer.copyFrom(iChan, 0, filteredBuffer, iChan, 0, processBuffer.getNumSamples());
     }
+}
     
+void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
+{
+    for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
+    {
+        float* const writePtr = processBuffer.getWritePointer(ch);
+        float* const prevWritePtr = prevBuffer.getWritePointer(ch);
+        const float* prevReadPtr = prevBuffer.getReadPointer(ch);
+        const float* readPtr = processBuffer.getReadPointer(ch);
+        int lastSample = processBuffer.getNumSamples() - 1;
+        
+        writePtr[0] = -iirCoef.coefficients[3] * prevWritePtr[lastSample] -
+        iirCoef.coefficients[4] * prevWritePtr[lastSample-1] +
+        iirCoef.coefficients[0] * readPtr[0] +
+        iirCoef.coefficients[1] * prevReadPtr[lastSample] +
+        iirCoef.coefficients[2] * prevReadPtr[lastSample-1] ;
+        
+        
+        writePtr[1] = -iirCoef.coefficients[3] * writePtr[0] -
+        iirCoef.coefficients[4] * prevWritePtr[lastSample] +
+        iirCoef.coefficients[0] * readPtr[1] +
+        iirCoef.coefficients[1] * readPtr[0] +
+        iirCoef.coefficients[2] * prevReadPtr[lastSample];
+        for (int sample = 2; sample < processBuffer.getNumSamples(); ++sample)
+        {
+            writePtr[sample]  = -iirCoef.coefficients[3] * writePtr[sample-1] -
+            iirCoef.coefficients[4] * writePtr[sample-2] +
+            iirCoef.coefficients[0] * readPtr[sample] +
+            iirCoef.coefficients[1] * readPtr[sample-1] +
+            iirCoef.coefficients[2] * readPtr[sample-2] ;
+        }
+    }
+    
+    prevBuffer = processBuffer;
 }
 
 void LpfilterAudioProcessor::updateParameters()
 {
+    // Update lpfJuce
     *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(getSampleRate(), *frequency);
     
+    // Update lpfDspLib
     paramsDsp[2] = frequency->get();
     lpfDspLib->setParams(paramsDsp);
+    
+    // Update custom filter coeffiecients
+     iirCoef = IIRCoefficients::makeLowPass(getSampleRate(), *frequency);
 }
 
 //==============================================================================
