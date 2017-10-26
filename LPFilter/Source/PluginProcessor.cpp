@@ -1,12 +1,12 @@
 /*
-  ==============================================================================
-
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
+ ==============================================================================
+ 
+ This file was auto-generated!
+ 
+ It contains the basic framework code for a JUCE plugin processor.
+ 
+ ==============================================================================
+ */
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -16,18 +16,18 @@
 //==============================================================================
 LpfilterAudioProcessor::LpfilterAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       // Sets Input and Output bus to be stereo by default
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       ),
+: AudioProcessor (BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+                  // Sets Input and Output bus to be stereo by default
+                  .withInput  ("Input",  AudioChannelSet::stereo(), true)
 #endif
-        // Setup lpfJuce
-        lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFreq))
+                  .withOutput ("Output", AudioChannelSet::stereo(), true)
+#endif
+                  ),
+#endif
+// Setup lpfJuce
+lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFreq))
 
 {
     //Setup filter with DSPFilters lib
@@ -53,29 +53,29 @@ const String LpfilterAudioProcessor::getName() const
 
 bool LpfilterAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool LpfilterAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool LpfilterAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 double LpfilterAudioProcessor::getTailLengthSeconds() const
@@ -86,7 +86,7 @@ double LpfilterAudioProcessor::getTailLengthSeconds() const
 int LpfilterAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int LpfilterAudioProcessor::getCurrentProgram()
@@ -122,7 +122,6 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     paramsDsp[1] = 1;               // order
     paramsDsp[2] = defaultFreq;     // cut-off frequency
     lpfDspLib->setParams(paramsDsp);
-    
 
     // Set up custom LPF coefficients
     iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
@@ -130,7 +129,7 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     // Set up previous buffer for custom filter
     prevBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
     prevBuffer.clear();
-
+    
     filteredBuffer.setSize(2, samplesPerBlock);
 }
 
@@ -165,7 +164,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     ScopedNoDenormals noDenormals;
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
-
+    
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -209,7 +208,6 @@ void LpfilterAudioProcessor::juceModulesProcess(AudioSampleBuffer& processBuffer
     
     // lpfJuce filter processing
     lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
-   
 }
 void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer) noexcept
 {
@@ -236,7 +234,7 @@ void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer
     }
     
 }
-    
+
 void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
 {
 
@@ -247,7 +245,7 @@ void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noe
         const float* prevReadPtr = prevBuffer.getReadPointer(ch);
         const float* readPtr = processBuffer.getReadPointer(ch);
         int lastSample = processBuffer.getNumSamples() - 1;
-
+        
         writePtr[0] = -iirCoef.coefficients[3] * prevWritePtr[lastSample] -
         iirCoef.coefficients[4] * prevWritePtr[lastSample-1] +
         iirCoef.coefficients[0] * readPtr[0] +
@@ -284,7 +282,7 @@ void LpfilterAudioProcessor::updateParameters()
     lpfDspLib->setParams(paramsDsp);
     
     // Update custom filter coeffiecients
-     iirCoef = IIRCoefficients::makeLowPass(getSampleRate(), *frequency);
+    iirCoef = IIRCoefficients::makeLowPass(getSampleRate(), *frequency);
 }
 
 //==============================================================================
@@ -298,18 +296,51 @@ AudioProcessorEditor* LpfilterAudioProcessor::createEditor()
     return new LpfilterAudioProcessorEditor (*this);
 }
 
+
 //==============================================================================
 void LpfilterAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    
+    XmlElement xml ("MYPLUGINSETTINGS");
+    
+    //Store parameter values
+    for (auto* paramArray : getParameters())
+    {
+        if (auto* p = dynamic_cast<AudioProcessorParameterWithID*>(paramArray))
+            xml.setAttribute(p->paramID, p->getValue());
+    }
+    
+    copyXmlToBinary(xml, destData);
+    
 }
 
 void LpfilterAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    
+    // ScopedPointer !!
+    ScopedPointer<XmlElement> xmlState (getXmlFromBinary(data, sizeInBytes));
+    
+    if (xmlState != nullptr)
+    {
+        // Check if it's the same xml that was saved before
+        if (xmlState->hasTagName("MYPLUGINSETTINGS"))
+        {
+            // Restore the parameters
+            for (auto* paramArray : getParameters())
+            {
+                if (auto* p = dynamic_cast<AudioProcessorParameterWithID*>(paramArray))
+                {
+                    float attributeValue = xmlState->getDoubleAttribute(p->paramID, p->getValue());
+                    p->setValue(attributeValue);
+                }
+            }
+        }
+    }
 }
 
 //==============================================================================
