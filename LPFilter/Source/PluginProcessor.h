@@ -11,7 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-
+#include "DspFilters/Dsp.h"
 
 //==============================================================================
 /**
@@ -61,13 +61,23 @@ public:
 
 private:
     
-    void process (dsp::ProcessContextReplacing<float>) noexcept;
+    void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
+    void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
+    void customProcess () noexcept;
+    
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
+
+    Dsp::Params paramsDsp;
     float defaultFreq = 60.f;
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
+    
+    ScopedPointer<Dsp::Filter> lpfDspLib;
+    
+    AudioSampleBuffer filteredBuffer;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };

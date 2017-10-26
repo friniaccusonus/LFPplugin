@@ -23,16 +23,19 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" aaxFolder="~/SDKs/AAX/2.2.1" vst3Folder="">
+    <XCODE_MAC targetFolder="Builds/MacOSX" aaxFolder="~/SDKs/AAX/2.2.1" vst3Folder=""
+               externalLibraries="DSPFilters">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="LPFilter"
                        osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"
                        cppLibType="libc++" binaryPath="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"
-                       xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"/>
+                       xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"
+                       libraryPath="~/SDKs/DSPFilters/Lib/Debug/" headerPath="~/SDKs/DSPFilters/shared/DSPFilters/include/"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="LPFilter"
                        osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"
                        cppLibType="libc++" binaryPath="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"
-                       xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"/>
+                       xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"
+                       libraryPath="~/SDKs/DSPFilters/Lib/Release/" headerPath="~/SDKs/DSPFilters/shared/DSPFilters/include"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../SDKs/JuceLibrary/5.1.2/modules"/>
