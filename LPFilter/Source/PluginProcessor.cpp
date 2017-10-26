@@ -38,6 +38,7 @@ lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFre
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
     addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
+    addParameter(bypass = new AudioParameterBool("bypas", "Bypass", false));
     
 }
 
@@ -177,27 +178,29 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     //Update frequency parameter
     updateParameters();
-
-    if (mode->getIndex() == 0)
+    if (! *bypass)
     {
-        // Filtering with Juce Modules
-        juceModulesProcess (ioBuffer);
-    }
-    else if (mode->getIndex() == 1)
-    {
-        // Filtering with DSPFilters
-        dspFiltersProcess (ioBuffer);
-    }
-    else
-    {
-        // Filtering with custom filter
-        customProcess(ioBuffer);
-    }
-    
-    // Apply gain
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        ioBuffer.applyGain (*gain);
+        if (mode->getIndex() == 0)
+        {
+            // Filtering with Juce Modules
+            juceModulesProcess (ioBuffer);
+        }
+        else if (mode->getIndex() == 1)
+        {
+            // Filtering with DSPFilters
+            dspFiltersProcess (ioBuffer);
+        }
+        else
+        {
+            // Filtering with custom filter
+            customProcess(ioBuffer);
+        }
+        
+        // Apply gain
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            ioBuffer.applyGain (*gain);
+        }
     }
 }
 
@@ -237,7 +240,6 @@ void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer
 
 void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
 {
-
     for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
     {
         float* const writePtr = processBuffer.getWritePointer(ch);
