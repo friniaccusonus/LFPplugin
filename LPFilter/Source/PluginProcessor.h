@@ -73,7 +73,6 @@ private:
     IIRCoefficients      iirCoef;
 
     Dsp::Params paramsDsp;
-    float defaultFreq = 60.f;
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     

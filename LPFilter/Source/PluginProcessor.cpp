@@ -24,19 +24,12 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
 #endif
                   .withOutput ("Output", AudioChannelSet::stereo(), true)
 #endif
-                  ),
+                  )
 #endif
-// Setup lpfJuce
-lpfJuce(dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(44100.0, defaultFreq))
-
 {
-    //Setup filter with DSPFilters lib
-    lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>;
-    
-    
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
-    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
+    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
     addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
     addParameter(bypass = new AudioParameterBool("bypas", "Bypass", false));
     
@@ -118,10 +111,19 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     dsp::ProcessSpec spec {sampleRate, static_cast<uint32>(samplesPerBlock), channels};
     lpfJuce.prepare(spec);
     
+    // Setup lpfJuce
+    // !!!
+    //lpfJuce (dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(sampleRate, defaultFreq));
+
+    //Setup filter with DSPFilters lib
+    lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, (int) channels>;
+    
+    
+    
     // Prepare lpfDspLib filter
     paramsDsp[0] = sampleRate;      // sample rate
     paramsDsp[1] = 1;               // order
-    paramsDsp[2] = defaultFreq;     // cut-off frequency
+    paramsDsp[2] = 60.f;            // cut-off frequency
     lpfDspLib->setParams(paramsDsp);
 
     // Set up custom LPF coefficients
@@ -190,17 +192,18 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
             // Filtering with DSPFilters
             dspFiltersProcess (ioBuffer);
         }
-        else
+        else if (mode->getIndex() == 2)
         {
             // Filtering with custom filter
             customProcess(ioBuffer);
         }
+        else
+        {
+            jassert(mode->getIndex()<=2);
+        }
         
         // Apply gain
-        for (int channel = 0; channel < totalNumInputChannels; ++channel)
-        {
-            ioBuffer.applyGain (*gain);
-        }
+        ioBuffer.applyGain (*gain);
     }
 }
 
