@@ -61,7 +61,7 @@ public:
 
 private:
     
-    void juceModulesProcess (dsp::ProcessContextReplacing<float>) noexcept;
+    void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
     void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
     void customProcess () noexcept;
     

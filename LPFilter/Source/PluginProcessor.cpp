@@ -166,14 +166,11 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     //Update frequency parameter
     updateParameters();
     
-    // Define the block that passes into juceModulesProcess function
-    dsp::AudioBlock<float> block (ioBuffer);
-    
     // Filtering with Juce Modules
-    //juceModulesProcess (dsp::ProcessContextReplacing<float> (block));
+    juceModulesProcess (ioBuffer);
     
     // Filtering with DSPFilters
-    dspFiltersProcess (ioBuffer);
+    //dspFiltersProcess (ioBuffer);
     
     // Filtering with custom filter
     
@@ -184,9 +181,12 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     }
 }
 
-void LpfilterAudioProcessor::juceModulesProcess(dsp::ProcessContextReplacing<float> context) noexcept
+void LpfilterAudioProcessor::juceModulesProcess(AudioSampleBuffer& processBuffer) noexcept
 {
-    lpfJuce.process(context);
+    // Define the block that passes into juceModulesProcess function
+    dsp::AudioBlock<float> block (processBuffer);
+    
+    lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
 }
 void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer) noexcept
 {
