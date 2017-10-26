@@ -122,7 +122,7 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     paramsDsp[1] = 1;               // order
     paramsDsp[2] = defaultFreq;     // cut-off frequency
     lpfDspLib->setParams(paramsDsp);
-    
+
     // Set up custom LPF coefficients
     iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
     
@@ -177,7 +177,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     //Update frequency parameter
     updateParameters();
-    
+
     if (mode->getIndex() == 0)
     {
         // Filtering with Juce Modules
@@ -237,7 +237,7 @@ void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer
 
 void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
 {
-    
+
     for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
     {
         float* const writePtr = processBuffer.getWritePointer(ch);
@@ -258,7 +258,7 @@ void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noe
         iirCoef.coefficients[0] * readPtr[1] +
         iirCoef.coefficients[1] * readPtr[0] +
         iirCoef.coefficients[2] * prevReadPtr[lastSample];
-        
+
         for (int sample = 2; sample < processBuffer.getNumSamples(); ++sample)
         {
             writePtr[sample]  = -iirCoef.coefficients[3] * writePtr[sample-1] -
