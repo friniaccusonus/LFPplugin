@@ -61,7 +61,10 @@ public:
 
 private:
     
-    void process (AudioSampleBuffer& buffer) noexcept;
+    void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
+    void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
+    void customProcess (AudioSampleBuffer& buffer) noexcept;
+    
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
@@ -75,8 +78,10 @@ private:
     
     ScopedPointer<Dsp::Filter> lpfDspLib;
     
-    AudioSampleBuffer tempBuffer;
+
     AudioSampleBuffer prevBuffer;
+    AudioSampleBuffer filteredBuffer;
+     
     
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)

@@ -20,7 +20,6 @@
       <FILE id="hAt2hJ" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="odN3kd" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="o0T1Zn" name="Dsp.h" compile="0" resource="0" file="../../DSPFilters/shared/DSPFilters/include/DspFilters/Dsp.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -31,12 +30,12 @@
                        osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"
                        cppLibType="libc++" binaryPath="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"
                        xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Debug"
-                       libraryPath="~/AccusonusProjects/DSPFilters/Lib/Debug/" headerPath="$(HOME)/AccusonusProjects/DSPFilters/shared/DSPFilters/include/"/>
+                       libraryPath="~/SDKs/DSPFilters/Lib/Debug/" headerPath="~/SDKs/DSPFilters/shared/DSPFilters/include/"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="LPFilter"
                        osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"
                        cppLibType="libc++" binaryPath="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"
                        xcodeAaxBinaryLocation="$(HOME)/AccusonusProjects/LPFplugin/LPFilter/Builds/MacOSX/build/Release"
-                       libraryPath="~/AccusonusProjects/DSPFilters/Lib/Release/" headerPath="$(HOME)/AccusonusProjects/DSPFilters/shared/DSPFilters/include"/>
+                       libraryPath="~/SDKs/DSPFilters/Lib/Release/" headerPath="~/SDKs/DSPFilters/shared/DSPFilters/include"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../SDKs/JuceLibrary/5.1.2/modules"/>
