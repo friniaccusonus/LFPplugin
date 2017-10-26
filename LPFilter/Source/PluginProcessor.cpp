@@ -116,21 +116,22 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     lpfJuce.prepare(spec);
     
     // Prepare lpfDspLib filter
-    paramsDsp[0] = sampleRate; paramsDsp[1] = 1; paramsDsp[2] = defaultFreq;
+    paramsDsp[0] = sampleRate;      // sample rate
+    paramsDsp[1] = 1;               // order
+    paramsDsp[2] = defaultFreq;     // cut-off frequency
     lpfDspLib->setParams(paramsDsp);
     
+
     // Set up custom LPF coefficients
     iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
-    
-    if (getTotalNumInputChannels() < 2 )
-    {
-        tempBuffer.setSize(2, samplesPerBlock);
-    }
     
     // Set up previous buffer for custom filter
     prevBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
     prevBuffer.clear();
+
+    filteredBuffer.setSize(2, samplesPerBlock);
 }
+
 
 void LpfilterAudioProcessor::releaseResources()
 {
@@ -176,8 +177,17 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     //Update frequency parameter
     updateParameters();
     
-    // The filtering process happens here
-    process (ioBuffer);
+    // Define the block that passes into juceModulesProcess function
+    dsp::AudioBlock<float> block (ioBuffer);
+    
+    // Filtering with Juce Modules
+    //juceModulesProcess (dsp::ProcessContextReplacing<float> (block));
+    
+    // Filtering with DSPFilters
+    //dspFiltersProcess (ioBuffer);
+    
+    // Filtering with custom filter
+    customProcess(ioBuffer);
     
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -186,33 +196,37 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     }
 }
 
-void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
+void LpfilterAudioProcessor::juceModulesProcess(dsp::ProcessContextReplacing<float> context) noexcept
 {
-    // Define the block that passes into process function
-    dsp::AudioBlock<float> block (processBuffer);
+    lpfJuce.process(context);
+}
+void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer) noexcept
+{
+    int bufferChans = processBuffer.getNumChannels(); // channels of the input buffer (1 or 2)
+    int filterChans = filteredBuffer.getNumChannels(); // channels of the filtered buffer (2)
     
-    // lpfJuce filter processing
-   // lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
-    
-    // lpfDspLib filter processing
-    /*
-    if (getTotalNumInputChannels() < 2 )
+    // fill filteredBuffer with data from processBuffer
+    for (int iChan = 0; iChan < filterChans; ++iChan)
     {
-        tempBuffer.copyFrom(0, *tempBuffer.getReadPointer(0), processBuffer.getReadPointer(0), processBuffer.getNumSamples());
-        tempBuffer.copyFrom(1, *tempBuffer.getReadPointer(1), processBuffer.getReadPointer(0), processBuffer.getNumSamples());
-    
-        lpfDspLib->process(tempBuffer.getNumSamples(), tempBuffer.getArrayOfWritePointers());
-        
-        processBuffer.copyFrom(0, *processBuffer.getWritePointer(0), tempBuffer.getWritePointer(0), tempBuffer.getNumSamples());
-        
+        /* left channel of tempBuffer = left channel of processBuffer
+         right channel of tempBuffer = left channel of processBuffer(mono version)
+         or right channel of processBuffer(stereo version)
+         */
+        filteredBuffer.copyFrom(iChan, 0, processBuffer, jmin(iChan, bufferChans - 1), 0, processBuffer.getNumSamples());
     }
-    else
+    
+    // process data
+    lpfDspLib->process(filteredBuffer.getNumSamples(), filteredBuffer.getArrayOfWritePointers());
+    
+    for (int iChan = 0; iChan < bufferChans; ++iChan)
     {
-        lpfDspLib->process(processBuffer.getNumSamples(), processBuffer.getArrayOfWritePointers());
+        // copy data to the output buffer
+        processBuffer.copyFrom(iChan, 0, filteredBuffer, iChan, 0, processBuffer.getNumSamples());
     }
-     */
+}
     
-    // Custom filter processing
+void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
+{
     for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
     {
         float* const writePtr = processBuffer.getWritePointer(ch);
@@ -221,24 +235,24 @@ void LpfilterAudioProcessor::process (AudioSampleBuffer& processBuffer) noexcept
         const float* readPtr = processBuffer.getReadPointer(ch);
         
         writePtr[0] = -iirCoef.coefficients[3] * prevWritePtr[511] -
-                            iirCoef.coefficients[4] * prevWritePtr[510] +
-                            iirCoef.coefficients[0] * readPtr[0] +
-                            iirCoef.coefficients[1] * prevReadPtr[511] +
-                            iirCoef.coefficients[2] * prevReadPtr[510] ;
+        iirCoef.coefficients[4] * prevWritePtr[510] +
+        iirCoef.coefficients[0] * readPtr[0] +
+        iirCoef.coefficients[1] * prevReadPtr[511] +
+        iirCoef.coefficients[2] * prevReadPtr[510] ;
         
         
         writePtr[1] = -iirCoef.coefficients[3] * writePtr[0] -
-                            iirCoef.coefficients[4] * prevWritePtr[511] +
-                            iirCoef.coefficients[0] * readPtr[1] +
-                            iirCoef.coefficients[1] * readPtr[0] +
-                            iirCoef.coefficients[2] * prevReadPtr[511];
+        iirCoef.coefficients[4] * prevWritePtr[511] +
+        iirCoef.coefficients[0] * readPtr[1] +
+        iirCoef.coefficients[1] * readPtr[0] +
+        iirCoef.coefficients[2] * prevReadPtr[511];
         for (int sample = 2; sample < processBuffer.getNumSamples(); ++sample)
         {
             writePtr[sample]  = -iirCoef.coefficients[3] * writePtr[sample-1] -
-                                iirCoef.coefficients[4] * writePtr[sample-2] +
-                                iirCoef.coefficients[0] * readPtr[sample] +
-                                iirCoef.coefficients[1] * readPtr[sample-1] +
-                                iirCoef.coefficients[2] * readPtr[sample-2] ;
+            iirCoef.coefficients[4] * writePtr[sample-2] +
+            iirCoef.coefficients[0] * readPtr[sample] +
+            iirCoef.coefficients[1] * readPtr[sample-1] +
+            iirCoef.coefficients[2] * readPtr[sample-2] ;
         }
     }
     
