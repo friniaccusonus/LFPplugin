@@ -178,7 +178,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     updateParameters();
     
     // Filtering with Juce Modules
-    juceModulesProcess (ioBuffer);
+    //juceModulesProcess (ioBuffer);
     
     // Filtering with DSPFilters
     //dspFiltersProcess (ioBuffer);
