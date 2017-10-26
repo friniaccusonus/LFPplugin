@@ -78,11 +78,8 @@ private:
     
     ScopedPointer<Dsp::Filter> lpfDspLib;
     
-
     AudioSampleBuffer prevBuffer;
     AudioSampleBuffer filteredBuffer;
-     
-    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };

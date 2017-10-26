@@ -134,6 +134,7 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     filteredBuffer.setSize(2, samplesPerBlock);
 }
 
+
 void LpfilterAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
@@ -177,7 +178,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     //Update frequency parameter
     updateParameters();
-    
+
     if (mode->getIndex() == 0)
     {
         // Filtering with Juce Modules
@@ -235,30 +236,31 @@ void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer
     }
     
 }
-
-void LpfilterAudioProcessor::customProcess(AudioSampleBuffer &processBuffer) noexcept
+    
+void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
 {
-    // Custom filter processing
+
     for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
     {
-        
         float* const writePtr = processBuffer.getWritePointer(ch);
         float* const prevWritePtr = prevBuffer.getWritePointer(ch);
         const float* prevReadPtr = prevBuffer.getReadPointer(ch);
         const float* readPtr = processBuffer.getReadPointer(ch);
-        
-        writePtr[0] = -iirCoef.coefficients[3] * prevWritePtr[511] -
-        iirCoef.coefficients[4] * prevWritePtr[510] +
+        int lastSample = processBuffer.getNumSamples() - 1;
+
+        writePtr[0] = -iirCoef.coefficients[3] * prevWritePtr[lastSample] -
+        iirCoef.coefficients[4] * prevWritePtr[lastSample-1] +
         iirCoef.coefficients[0] * readPtr[0] +
-        iirCoef.coefficients[1] * prevReadPtr[511] +
-        iirCoef.coefficients[2] * prevReadPtr[510] ;
+        iirCoef.coefficients[1] * prevReadPtr[lastSample] +
+        iirCoef.coefficients[2] * prevReadPtr[lastSample-1] ;
         
         
         writePtr[1] = -iirCoef.coefficients[3] * writePtr[0] -
-        iirCoef.coefficients[4] * prevWritePtr[511] +
+        iirCoef.coefficients[4] * prevWritePtr[lastSample] +
         iirCoef.coefficients[0] * readPtr[1] +
         iirCoef.coefficients[1] * readPtr[0] +
-        iirCoef.coefficients[2] * prevReadPtr[511];
+        iirCoef.coefficients[2] * prevReadPtr[lastSample];
+
         for (int sample = 2; sample < processBuffer.getNumSamples(); ++sample)
         {
             writePtr[sample]  = -iirCoef.coefficients[3] * writePtr[sample-1] -
