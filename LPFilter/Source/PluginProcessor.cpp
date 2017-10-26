@@ -37,6 +37,8 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", defaultFreq, 10000.f, defaultFreq));
+    addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
+    
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -176,15 +178,22 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     //Update frequency parameter
     updateParameters();
-    
-    // Filtering with Juce Modules
-    //juceModulesProcess (ioBuffer);
-    
-    // Filtering with DSPFilters
-    dspFiltersProcess (ioBuffer);
-    
-    // Filtering with custom filter
-    customProcess(ioBuffer);
+
+    if (mode->getIndex() == 0)
+    {
+        // Filtering with Juce Modules
+        juceModulesProcess (ioBuffer);
+    }
+    else if (mode->getIndex() == 1)
+    {
+        // Filtering with DSPFilters
+        dspFiltersProcess (ioBuffer);
+    }
+    else
+    {
+        // Filtering with custom filter
+        customProcess(ioBuffer);
+    }
     
     // Apply gain
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -198,7 +207,9 @@ void LpfilterAudioProcessor::juceModulesProcess(AudioSampleBuffer& processBuffer
     // Define the block that passes into juceModulesProcess function
     dsp::AudioBlock<float> block (processBuffer);
     
+    // lpfJuce filter processing
     lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
+   
 }
 void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer) noexcept
 {
@@ -223,10 +234,12 @@ void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer
         // copy data to the output buffer
         processBuffer.copyFrom(iChan, 0, filteredBuffer, iChan, 0, processBuffer.getNumSamples());
     }
+    
 }
     
 void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noexcept
 {
+
     for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
     {
         float* const writePtr = processBuffer.getWritePointer(ch);
@@ -234,7 +247,7 @@ void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noe
         const float* prevReadPtr = prevBuffer.getReadPointer(ch);
         const float* readPtr = processBuffer.getReadPointer(ch);
         int lastSample = processBuffer.getNumSamples() - 1;
-        
+
         writePtr[0] = -iirCoef.coefficients[3] * prevWritePtr[lastSample] -
         iirCoef.coefficients[4] * prevWritePtr[lastSample-1] +
         iirCoef.coefficients[0] * readPtr[0] +
@@ -247,6 +260,7 @@ void LpfilterAudioProcessor::customProcess(AudioSampleBuffer& processBuffer) noe
         iirCoef.coefficients[0] * readPtr[1] +
         iirCoef.coefficients[1] * readPtr[0] +
         iirCoef.coefficients[2] * prevReadPtr[lastSample];
+
         for (int sample = 2; sample < processBuffer.getNumSamples(); ++sample)
         {
             writePtr[sample]  = -iirCoef.coefficients[3] * writePtr[sample-1] -

@@ -69,6 +69,7 @@ private:
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
     IIRCoefficients      iirCoef;
+    AudioParameterChoice* mode;
 
     Dsp::Params paramsDsp;
     float defaultFreq = 60.f;
@@ -79,8 +80,6 @@ private:
     
     AudioSampleBuffer prevBuffer;
     AudioSampleBuffer filteredBuffer;
-
-    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };
