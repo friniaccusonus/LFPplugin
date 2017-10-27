@@ -107,23 +107,20 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     // Get the number of channels
     auto channels = static_cast<uint32> (getMainBusNumInputChannels());
     
+    // Setup lpfJuce
+    dsp::IIR::Coefficients<float>* stateToUse = dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, *frequency);
+    *lpfJuce.state = *stateToUse;
     // Prepare lpfJuce filter
     dsp::ProcessSpec spec {sampleRate, static_cast<uint32>(samplesPerBlock), channels};
     lpfJuce.prepare(spec);
     
-    // Setup lpfJuce
-    // !!!
-    //lpfJuce (dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(sampleRate, defaultFreq));
-
     //Setup filter with DSPFilters lib
-    lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, (int) channels>;
-    
-    
+    lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>;
     
     // Prepare lpfDspLib filter
-    paramsDsp[0] = sampleRate;      // sample rate
-    paramsDsp[1] = 1;               // order
-    paramsDsp[2] = 60.f;            // cut-off frequency
+    paramsDsp[0] = sampleRate;              // sample rate
+    paramsDsp[1] = 1;                       // order
+    paramsDsp[2] = *frequency;              // cut-off frequency
     lpfDspLib->setParams(paramsDsp);
 
     // Set up custom LPF coefficients
@@ -180,6 +177,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     //Update frequency parameter
     updateParameters();
+    
     if (! *bypass)
     {
         if (mode->getIndex() == 0)

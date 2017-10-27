@@ -71,11 +71,9 @@ private:
     AudioParameterChoice* mode;
     AudioParameterBool* bypass;
     IIRCoefficients      iirCoef;
-
     Dsp::Params paramsDsp;
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
-    
     ScopedPointer<Dsp::Filter> lpfDspLib;
     
     AudioSampleBuffer prevBuffer;
