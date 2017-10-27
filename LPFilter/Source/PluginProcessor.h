@@ -58,6 +58,13 @@ public:
     
     //==============================================================================
     void updateParameters();
+    
+    //==============================================================================
+    // Parameters are public, so they can be accessed by the Editor
+    AudioParameterFloat* gain;
+    AudioParameterFloat* frequency;
+    AudioParameterChoice* mode;
+    AudioParameterBool* bypassParam;
 
 private:
     
@@ -65,11 +72,7 @@ private:
     void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
     void customProcess (AudioSampleBuffer& buffer) noexcept;
     
-    //==============================================================================
-    AudioParameterFloat* gain;
-    AudioParameterFloat* frequency;
-    AudioParameterChoice* mode;
-    AudioParameterBool* bypass;
+    
     IIRCoefficients      iirCoef;
     Dsp::Params paramsDsp;
     

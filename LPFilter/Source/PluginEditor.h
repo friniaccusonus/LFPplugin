@@ -17,7 +17,8 @@
 //==============================================================================
 /**
 */
-class LpfilterAudioProcessorEditor  : public AudioProcessorEditor
+class LpfilterAudioProcessorEditor  : public AudioProcessorEditor,
+                                      private Button::Listener
 {
 public:
     LpfilterAudioProcessorEditor (LpfilterAudioProcessor&);
@@ -28,9 +29,13 @@ public:
     void resized() override;
 
 private:
+    void buttonClicked (Button*) override;
+    
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     LpfilterAudioProcessor& processor;
+    
+    ToggleButton bypassButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessorEditor)
 };
