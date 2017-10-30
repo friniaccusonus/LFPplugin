@@ -68,15 +68,13 @@ private:
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
+    float previousFrequency;
     AudioParameterChoice* mode;
     AudioParameterBool* bypass;
     IIRCoefficients      iirCoef;
-
     Dsp::Params paramsDsp;
-    float defaultFreq = 60.f;
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
-    
     ScopedPointer<Dsp::Filter> lpfDspLib;
     
     AudioSampleBuffer prevBuffer;
