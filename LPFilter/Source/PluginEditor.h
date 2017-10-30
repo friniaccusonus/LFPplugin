@@ -18,6 +18,7 @@
 /**
 */
 class LpfilterAudioProcessorEditor  : public AudioProcessorEditor,
+                                      public Timer,
                                       private Button::Listener
 {
 public:
@@ -30,6 +31,9 @@ public:
 
 private:
     void buttonClicked (Button*) override;
+    void timerCallback() override;
+    void updateComponents();
+    
     
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
