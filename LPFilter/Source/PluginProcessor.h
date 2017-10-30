@@ -68,6 +68,7 @@ private:
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
+    float previousFrequency;
     AudioParameterChoice* mode;
     AudioParameterBool* bypass;
     IIRCoefficients      iirCoef;

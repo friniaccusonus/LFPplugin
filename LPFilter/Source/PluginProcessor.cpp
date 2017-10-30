@@ -127,10 +127,13 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
     
     // Set up previous buffer for custom filter
-    prevBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
+    prevBuffer.setSize(getMainBusNumInputChannels(), samplesPerBlock);
     prevBuffer.clear();
     
     filteredBuffer.setSize(2, samplesPerBlock);
+    
+    // Set previous frequncy to current frequency
+    previousFrequency = *frequency;
 }
 
 
@@ -176,7 +179,9 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     
     //Update frequency parameter
-    updateParameters();
+    
+    if (previousFrequency != *frequency)
+        updateParameters();
     
     if (! *bypass)
     {
@@ -197,7 +202,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
         }
         else
         {
-            jassert(mode->getIndex()<=2);
+            jassertfalse;
         }
         
         // Apply gain
@@ -286,6 +291,8 @@ void LpfilterAudioProcessor::updateParameters()
     
     // Update custom filter coeffiecients
     iirCoef = IIRCoefficients::makeLowPass(getSampleRate(), *frequency);
+    
+    previousFrequency = *frequency;
 }
 
 //==============================================================================
