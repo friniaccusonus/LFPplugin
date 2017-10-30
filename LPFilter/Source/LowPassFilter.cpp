@@ -43,3 +43,8 @@ void LowPassFilter::process(AudioSampleBuffer& bufferToProcess)
         
 }
 
+void LowPassFilter::updateFilterParameters()
+{
+    //...
+}
+

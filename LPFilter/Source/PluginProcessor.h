@@ -69,7 +69,8 @@ private:
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
-    
+    float previousFrequency;
+
     AudioParameterBool* bypass;
     IIRCoefficients      iirCoef;
     Dsp::Params paramsDsp;
