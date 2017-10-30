@@ -22,7 +22,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     bypassButton.setButtonText(processor.bypassParam->name);
     
     startTimerHz (30);
-    updateComponents();
+    bypassButton.setToggleState(*processor.bypassParam, dontSendNotification);
     
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -62,7 +62,9 @@ void LpfilterAudioProcessorEditor::resized()
 void LpfilterAudioProcessorEditor::updateComponents()
 {
     // Update components during automation
-    bypassButton.setToggleState(*processor.bypassParam, dontSendNotification);
+    const bool newButtonValue = *processor.bypassParam;
+    if (newButtonValue != bypassButton.getToggleState())
+        bypassButton.setToggleState( newButtonValue, dontSendNotification);
 }
 
 void LpfilterAudioProcessorEditor::timerCallback()

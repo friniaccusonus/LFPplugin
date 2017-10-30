@@ -72,7 +72,10 @@ private:
     void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
     void customProcess (AudioSampleBuffer& buffer) noexcept;
     
+
+    //==============================================================================
     
+    float previousFrequency;
     IIRCoefficients      iirCoef;
     Dsp::Params paramsDsp;
     
