@@ -59,6 +59,7 @@ public:
     //==============================================================================
     void updateParameters();
 
+    AudioParameterChoice* mode;
 private:
     
     void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
@@ -68,7 +69,7 @@ private:
     //==============================================================================
     AudioParameterFloat* gain;
     AudioParameterFloat* frequency;
-    AudioParameterChoice* mode;
+    
     AudioParameterBool* bypass;
     IIRCoefficients      iirCoef;
     Dsp::Params paramsDsp;
