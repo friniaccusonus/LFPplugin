@@ -34,7 +34,7 @@ LpfilterAudioProcessorEditor::~LpfilterAudioProcessorEditor()
 //==============================================================================
 void LpfilterAudioProcessorEditor::buttonClicked(Button* button)
 {
-    
+    processor.bypassParam->operator=(button->getToggleState()) ;
 }
 
 //==============================================================================
@@ -49,5 +49,6 @@ void LpfilterAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    bypassButton.setSize(100, 40);
+    bypassButton.setSize(80, 40);   // Sets button's size
+    
 }
