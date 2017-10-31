@@ -11,18 +11,31 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "DspFilters/Dsp.h"
 
-class LowPassFilter : public dsp::IIR::Filter<float>,
-                        public Dsp::Filter
+class LowPassFilter
 {
 public:
+    enum class filterType
+    : int
+    {
+        juceDspModules = 0,
+        vfLibrary = 1,
+        customFilter = 2,
+    };
+    
     LowPassFilter ();
     ~LowPassFilter();
     
-    void prepareFilter(double sampleRate, int samplesPerBlock, int filterType);
+    void setup();
+    void prepareFilter(double sampleRate, int samplesPerBlock, int filterMode);
     void process(AudioSampleBuffer& bufferToProcess);
     void updateFilterParameters();
     void updateFilterType();
 private:
+    float previousFrequency;
+    
+    void juceDspProcess(AudioSampleBuffer& processBuffer) noexcept;
+    void vfLibraryProcess(AudioSampleBuffer& processBuffer) noexcept;
+    void customFilterProcess(AudioSampleBuffer& processBuffer) noexcept;
     
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     ScopedPointer<Dsp::Filter> lpfDspLib;
