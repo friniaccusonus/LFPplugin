@@ -21,12 +21,14 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     bypassButton.addListener(this);
     bypassButton.setButtonText(processor.bypassParam->name);
     
-    startTimerHz (30);
-    bypassButton.setToggleState(*processor.bypassParam, dontSendNotification);
+    //bypassButton.setToggleState(*processor.bypassParam, dontSendNotification);
+    updateComponents();
     
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
+    
+    startTimerHz (30);
 }
 
 LpfilterAudioProcessorEditor::~LpfilterAudioProcessorEditor()
