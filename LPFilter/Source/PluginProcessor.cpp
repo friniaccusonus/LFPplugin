@@ -104,6 +104,9 @@ void LpfilterAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    
+    lpFilter->prepareFilter(sampleRate, samplesPerBlock, mode->getIndex());
+    /*
     // Get the number of channels
     auto channels = static_cast<uint32> (getMainBusNumInputChannels());
     
@@ -134,6 +137,7 @@ void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     
     // Set previous frequncy to current frequency
     previousFrequency = *frequency;
+     */
 }
 
 
@@ -185,6 +189,8 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     if (! *bypass)
     {
+    
+        /*
         if (mode->getIndex() == 0)
         {
             // Filtering with Juce Modules
@@ -204,7 +210,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
         {
             jassertfalse;
         }
-        
+        */
         // Apply gain
         ioBuffer.applyGain (*gain);
     }
@@ -213,10 +219,10 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
 void LpfilterAudioProcessor::juceModulesProcess(AudioSampleBuffer& processBuffer) noexcept
 {
     // Define the block that passes into juceModulesProcess function
-    dsp::AudioBlock<float> block (processBuffer);
+    //dsp::AudioBlock<float> block (processBuffer);
     
     // lpfJuce filter processing
-    lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
+    //lpfJuce.process(dsp::ProcessContextReplacing<float> (block));
 }
 void LpfilterAudioProcessor::dspFiltersProcess (AudioSampleBuffer& processBuffer) noexcept
 {

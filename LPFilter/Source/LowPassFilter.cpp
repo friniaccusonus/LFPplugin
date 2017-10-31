@@ -8,39 +8,36 @@
 
 #include "LowPassFilter.h"
 
-LowPassFilter::LowPassFilter(LpfilterAudioProcessor& processor)
-: processor(processor)
+LowPassFilter::LowPassFilter()
 {
-    //...
+    //..
 }
-
 
 LowPassFilter::~LowPassFilter()
 {
+    //..
 }
 
-void LowPassFilter::prepareFilter()
+void LowPassFilter::prepareFilter(double sampleRate, int samplesPerBlock, int filterType)
 {
-    //...
+    switch (filterType) {
+        case 0:
+            // prepare LPF with JUCE modules
+            
+            break;
+        case 1:
+            // prepare VF
+        case 2:
+            // prepare custom
+        default:
+            jassertfalse;
+            break;
+    }
 }
 
 void LowPassFilter::process(AudioSampleBuffer& bufferToProcess)
 {
-    if (*processor.mode == 0)
-    {
-        // Process audio data with Juce Dsp modules
-    }
-    else if (*processor.mode == 1)
-    {
-        // Process with VF filters
-    }
-    else if (*processor.mode == 2)
-    {
-        // Process audio data with custom filter
-    }
-    else
-        jassertfalse;
-        
+
 }
 
 void LowPassFilter::updateFilterParameters()

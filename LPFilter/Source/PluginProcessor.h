@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "DspFilters/Dsp.h"
+#include "LowPassFilter.h"
 
 //==============================================================================
 /**
@@ -60,6 +61,10 @@ public:
     void updateParameters();
 
     AudioParameterChoice* mode;
+    
+    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
+    
+    ScopedPointer<LowPassFilter> lpFilter;
 private:
     
     void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
@@ -75,7 +80,6 @@ private:
     IIRCoefficients      iirCoef;
     Dsp::Params paramsDsp;
     
-    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     ScopedPointer<Dsp::Filter> lpfDspLib;
     
     AudioSampleBuffer prevBuffer;

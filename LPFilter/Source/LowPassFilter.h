@@ -4,24 +4,29 @@
 //
 //  Created by Effrosyni Paschou on 30/10/2017.
 //
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
 
 #ifndef LowPassFilter_h
 #define LowPassFilter_h
 
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "DspFilters/Dsp.h"
 
-#endif /* LowPassFilter_h */
-
-class LowPassFilter
+class LowPassFilter : public dsp::IIR::Filter<float>,
+                        public Dsp::Filter
 {
 public:
-    LowPassFilter (LpfilterAudioProcessor&);
+    LowPassFilter ();
     ~LowPassFilter();
     
-    void updateFilterParameters();
-    void prepareFilter();
+    void prepareFilter(double sampleRate, int samplesPerBlock, int filterType);
     void process(AudioSampleBuffer& bufferToProcess);
+    void updateFilterParameters();
+    void updateFilterType();
 private:
-    LpfilterAudioProcessor& processor;
+    
+    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
+    ScopedPointer<Dsp::Filter> lpfDspLib;
+    
 };
+
+#endif /* LowPassFilter_h */
