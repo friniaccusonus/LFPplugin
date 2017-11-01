@@ -17,10 +17,28 @@
 //==============================================================================
 /**
 */
+
+struct KnobSlider :    public Slider
+{
+    KnobSlider(){}
+    
+    String getTextFromValue (double value) override
+    {
+        if (value > 999)
+        {
+            auto newValue = value / 1000;
+            return String (newValue, getNumDecimalPlacesToDisplay()) + " " +getTextValueSuffix();
+        }
+        else
+            return String (value) + " " + getTextValueSuffix();
+    }
+};
+
 class LpfilterAudioProcessorEditor  : public AudioProcessorEditor,
                                       public Timer,
                                       private Button::Listener,
-                                      private ComboBox::Listener
+                                      private ComboBox::Listener,
+                                      private Slider::Listener
 {
 public:
     LpfilterAudioProcessorEditor (LpfilterAudioProcessor&);
@@ -33,6 +51,9 @@ public:
 private:
     void buttonClicked (Button*) override;
     void comboBoxChanged(ComboBox*) override;
+    void sliderDragStarted (Slider*) override;
+    void sliderValueChanged(Slider*) override;
+    void sliderDragEnded(Slider*) override;
     void timerCallback() override;
     void updateComponents();
     
@@ -43,8 +64,10 @@ private:
     
     ToggleButton bypassButton;
     ComboBox filterModeBox;
+    ScopedPointer<KnobSlider> frequencyKnob;
     
     Label filterModeLabel;
+    Label frequencyLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessorEditor)
 };

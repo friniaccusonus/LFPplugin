@@ -18,6 +18,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
 {
     // Add components
     
+    /* Adding filter mode drop-down menu and it's label*/
     addAndMakeVisible(filterModeLabel);
     filterModeLabel.setText("Filter Type", dontSendNotification);
     filterModeLabel.attachToComponent(&filterModeBox, true);
@@ -28,6 +29,19 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     filterModeBox.setSelectedId(1);
     filterModeBox.addListener(this);
     
+    /* Add frequency knob and it's label */
+    addAndMakeVisible(frequencyLabel);
+    frequencyLabel.setText("Frequency", dontSendNotification);
+    frequencyLabel.attachToComponent(frequencyKnob, true);
+    
+    addAndMakeVisible(frequencyKnob = new KnobSlider());
+    frequencyKnob->addListener(this);
+    frequencyKnob->setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    frequencyKnob->setRotaryParameters(5*M_PI_4, 11*M_PI_4, true);
+    frequencyKnob->setRange(60.0, 10000.0, 1.0);
+    frequencyKnob->setTextValueSuffix("Hz");
+    
+    /* Add bypass button */
     addAndMakeVisible (bypassButton);
     bypassButton.addListener(this);
     bypassButton.setButtonText(processor.bypassParam->name);
@@ -63,6 +77,31 @@ void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
     }
 }
 
+void LpfilterAudioProcessorEditor::sliderDragStarted (Slider* slider)
+{
+    
+}
+
+void LpfilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
+{
+    auto knobValue = frequencyKnob->getValue();
+    if ( knobValue > 999)
+    {
+        frequencyKnob->getTextFromValue(knobValue);
+        frequencyKnob->setTextValueSuffix("kHz");
+    }
+    else
+    {
+        frequencyKnob->setTextValueSuffix("Hz");
+    }
+}
+
+void LpfilterAudioProcessorEditor::sliderDragEnded(Slider* slider)
+{
+    
+}
+
+
 //==============================================================================
 void LpfilterAudioProcessorEditor::paint (Graphics& g)
 {
@@ -76,31 +115,44 @@ void LpfilterAudioProcessorEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
     
+    /* Drop-down menu */
     auto boundsToDivide = getLocalBounds().reduced(20);
     auto newBounds = boundsToDivide;
+    //auto modeBoxBounds = boundsToDivide;
     boundsToDivide.removeFromRight(20);
     boundsToDivide.removeFromLeft(100);
     filterModeBox.setBounds(boundsToDivide.removeFromTop(25)); // Removes strip, reduces the rectangle and returns the strip
     
-    boundsToDivide.removeFromTop(5);
+    boundsToDivide.removeFromTop(10);
     
-    auto buttonBounds = newBounds.removeFromTop(30);
+    /* Frequency knob */
+    //auto knobBounds = boundsToDivide;
+    frequencyKnob->setBounds(boundsToDivide.removeFromTop(80));
+    boundsToDivide.removeFromTop(10);
+        
+    /* Bypass button */
+    auto buttonBounds = boundsToDivide.removeFromTop(20);
     bypassButton.setSize(80, buttonBounds.getHeight());   // Sets button's size
-    bypassButton.setCentrePosition(newBounds.removeFromTop(50).getCentre());
+    bypassButton.setCentrePosition(newBounds.removeFromBottom(40).getCentre());
     
 }
 
 void LpfilterAudioProcessorEditor::updateComponents()
 {
     // Update components during automation
+    /* Bypass Button */
     const bool newButtonValue = *processor.bypassParam;
-    auto newFilterType = processor.mode->getIndex();
-    
     if (newButtonValue != bypassButton.getToggleState())
         bypassButton.setToggleState( newButtonValue, dontSendNotification);
     
+    /* Drop-down menu */
+    auto newFilterType = processor.mode->getIndex();
     if (newFilterType != filterModeBox.getSelectedItemIndex())
         filterModeBox.setSelectedItemIndex(newFilterType);
+    
+    /* Frequency knob */
+   
+    
 }
 
 void LpfilterAudioProcessorEditor::timerCallback()
