@@ -11,7 +11,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "DspFilters/Dsp.h"
-
+#include "LowPassFilter.h"
 
 //==============================================================================
 LpfilterAudioProcessor::LpfilterAudioProcessor()
@@ -149,23 +149,17 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
         ioBuffer.clear (i, 0, ioBuffer.getNumSamples());
     
     
-    //Update frequency parameter
-    
+    // Update frequency parameter
     if (previousFrequency != *frequency)
-        updateParameters();
+        lpFilter->updateFilterParameters();
     
     if (! *bypass)
     {
-        lpFilter->process(ioBuffer);
+        lpFilter->process(ioBuffer, mode->getIndex());
         
         // Apply gain
         ioBuffer.applyGain (*gain);
     }
-}
-
-void LpfilterAudioProcessor::updateParameters()
-{
-    lpFilter->updateFilterParameters();
 }
 
 //==============================================================================

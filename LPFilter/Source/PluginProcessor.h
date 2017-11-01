@@ -58,11 +58,11 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     //==============================================================================
-    void updateParameters();
 
     AudioParameterChoice* mode;
+    AudioParameterFloat* frequency;
     
-    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
+    //dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     
     ScopedPointer<LowPassFilter> lpFilter;
 private:
@@ -72,18 +72,17 @@ private:
     void customProcess (AudioSampleBuffer& buffer) noexcept;
     
     //==============================================================================
-    AudioParameterFloat* gain;
-    AudioParameterFloat* frequency;
+    
     float previousFrequency;
-
+    AudioParameterFloat* gain;
     AudioParameterBool* bypass;
-    IIRCoefficients      iirCoef;
-    Dsp::Params paramsDsp;
+    //IIRCoefficients      iirCoef;
+    //Dsp::Params paramsDsp;
     
-    ScopedPointer<Dsp::Filter> lpfDspLib;
+    //ScopedPointer<Dsp::Filter> lpfDspLib;
     
-    AudioSampleBuffer prevBuffer;
-    AudioSampleBuffer filteredBuffer;
+    //AudioSampleBuffer prevBuffer;
+    //AudioSampleBuffer filteredBuffer;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };

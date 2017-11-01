@@ -8,9 +8,9 @@
 
 #include "LowPassFilter.h"
 
-LowPassFilter::LowPassFilter()
+LowPassFilter::LowPassFilter(AudioProcessor& processor)
+: activeProcessor(processor)
 {
-    //..
 }
 
 LowPassFilter::~LowPassFilter()
@@ -28,48 +28,56 @@ void LowPassFilter::prepareFilter(double sampleRate, int samplesPerBlock, int fi
     switch (filterMode) {
             // prepare LPF with JUCE modules
         case 0:
+        {
             // Get the number of channels
-            auto channels = static_cast<uint32> (getMainBusNumInputChannels());
+            auto channels = static_cast<uint32> (activeProcessor.getMainBusNumInputChannels());
             
             // Setup lpfJuce
-            dsp::IIR::Coefficients<float>* stateToUse = dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, *frequency);
+            dsp::IIR::Coefficients<float>* stateToUse = dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, frequencyParameter);
             *lpfJuce.state = *stateToUse;
             // Prepare lpfJuce filter
             dsp::ProcessSpec spec {sampleRate, static_cast<uint32>(samplesPerBlock), channels};
             lpfJuce.prepare(spec);
             
             break;
-            
+        }
         // prepare VF's filter
         case 1:
+        {
             //Setup filter with DSPFilters lib
             lpfDspLib = new Dsp::FilterDesign<Dsp::Butterworth::Design::LowPass <1>, 2>;
             
             // Prepare lpfDspLib filter
             paramsDsp[0] = sampleRate;              // sample rate
             paramsDsp[1] = 1;                       // order
-            paramsDsp[2] = *frequency;              // cut-off frequency
+            paramsDsp[2] = frequencyParameter;              // cut-off frequency
             lpfDspLib->setParams(paramsDsp);
             
             filteredBuffer.setSize(2, samplesPerBlock);
         
             break;
+        }
         // prepare custom filter
         case 2:
+        {
             // Set up custom LPF coefficients
-            iirCoef = IIRCoefficients::makeLowPass(sampleRate, *frequency);
+            iirCoef = IIRCoefficients::makeLowPass(sampleRate, frequencyParameter);
             
             // Set up previous buffer for custom filter
-            prevBuffer.setSize(getMainBusNumInputChannels(), samplesPerBlock);
-            prevBuffer.clear();
-          
+            previousBuffer.setSize(activeProcessor.getMainBusNumInputChannels(), samplesPerBlock);
+            previousBuffer.clear();
+            
+            break;
+        }
         default:
+        {
             jassertfalse;
             break;
+        }
     }
     
     // Set previous frequency to current frequency
-    previousFrequency = *frequency;
+    previousFrequency = frequencyParameter;
 }
 
 void LowPassFilter::process(AudioSampleBuffer& bufferToProcess, int filterMode)
@@ -114,7 +122,7 @@ void LowPassFilter::vfLibraryProcess(AudioSampleBuffer& processBuffer) noexcept
          right channel of tempBuffer = left channel of processBuffer(mono version)
          or right channel of processBuffer(stereo version)
          */
-        filteredBuffer.copyFrom(iChan, 0, bufferToProcess, jmin(iChan, bufferChans - 1), 0, processBuffer.getNumSamples());
+        filteredBuffer.copyFrom(iChan, 0, processBuffer, jmin(iChan, bufferChans - 1), 0, processBuffer.getNumSamples());
     }
     
     // process data
@@ -129,11 +137,11 @@ void LowPassFilter::vfLibraryProcess(AudioSampleBuffer& processBuffer) noexcept
 
 void LowPassFilter::customFilterProcess(AudioSampleBuffer& processBuffer) noexcept
 {
-    for (int ch = 0; ch < getTotalNumInputChannels(); ++ch)
+    for (int ch = 0; ch < activeProcessor.getTotalNumInputChannels(); ++ch)
     {
         float* const writePtr = processBuffer.getWritePointer(ch);
-        float* const prevWritePtr = prevBuffer.getWritePointer(ch);
-        const float* prevReadPtr = prevBuffer.getReadPointer(ch);
+        float* const prevWritePtr = previousBuffer.getWritePointer(ch);
+        const float* prevReadPtr = previousBuffer.getReadPointer(ch);
         const float* readPtr = processBuffer.getReadPointer(ch);
         int lastSample = processBuffer.getNumSamples() - 1;
         
@@ -160,21 +168,21 @@ void LowPassFilter::customFilterProcess(AudioSampleBuffer& processBuffer) noexce
         }
     }
     
-    prevBuffer = processBuffer;
+    previousBuffer = processBuffer;
 }
 
 void LowPassFilter::updateFilterParameters()
 {
     // Update lpfJuce
-    *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(getSampleRate(), *frequency);
+    *lpfJuce.state = *dsp::IIR::Coefficients<float>::makeFirstOrderLowPass(activeProcessor.getSampleRate(), frequencyParameter);
     
     // Update lpfDspLib
-    paramsDsp[2] = frequency->get();
+    paramsDsp[2] = frequencyParameter;
     lpfDspLib->setParams(paramsDsp);
     
     // Update custom filter coeffiecients
-    iirCoef = IIRCoefficients::makeLowPass(getSampleRate(), *frequency);
+    iirCoef = IIRCoefficients::makeLowPass(activeProcessor.getSampleRate(), frequencyParameter);
     
-    previousFrequency = *frequency;
+    previousFrequency = frequencyParameter;
 }
 
