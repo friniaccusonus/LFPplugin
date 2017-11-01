@@ -19,7 +19,8 @@
 */
 class LpfilterAudioProcessorEditor  : public AudioProcessorEditor,
                                       public Timer,
-                                      private Button::Listener
+                                      private Button::Listener,
+                                      private ComboBox::Listener
 {
 public:
     LpfilterAudioProcessorEditor (LpfilterAudioProcessor&);
@@ -31,6 +32,7 @@ public:
 
 private:
     void buttonClicked (Button*) override;
+    void comboBoxChanged(ComboBox*) override;
     void timerCallback() override;
     void updateComponents();
     
@@ -40,6 +42,9 @@ private:
     LpfilterAudioProcessor& processor;
     
     ToggleButton bypassButton;
+    ComboBox filterModeBox;
+    
+    Label filterModeLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessorEditor)
 };
