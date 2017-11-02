@@ -32,14 +32,13 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     /* Add frequency knob and it's label */
     addAndMakeVisible(frequencyLabel);
     frequencyLabel.setText("Frequency", dontSendNotification);
-    frequencyLabel.attachToComponent(frequencyKnob, true);
+    frequencyLabel.attachToComponent(&frequencyKnob, true);
     
-    addAndMakeVisible(frequencyKnob = new KnobSlider());
-    frequencyKnob->addListener(this);
-    frequencyKnob->setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    frequencyKnob->setRotaryParameters(5*M_PI_4, 11*M_PI_4, true);
-    frequencyKnob->setRange(60.0, 10000.0, 1.0);
-    frequencyKnob->setTextValueSuffix("Hz");
+    addAndMakeVisible(frequencyKnob);
+    frequencyKnob.addListener(this);
+    frequencyKnob.setRange(processor.frequency->range.start, processor.frequency->range.end, 1.0);
+    frequencyKnob.setTextValueSuffix("Hz");
+    frequencyKnob.setSkewFactorFromMidPoint(2000.0);
     
     /* Add bypass button */
     addAndMakeVisible (bypassButton);
@@ -79,26 +78,25 @@ void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 
 void LpfilterAudioProcessorEditor::sliderDragStarted (Slider* slider)
 {
-    
+    if (slider == &frequencyKnob)
+        processor.frequency->beginChangeGesture();
 }
 
 void LpfilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
-    auto knobValue = frequencyKnob->getValue();
-    if ( knobValue > 999)
+    if (slider == &frequencyKnob)
     {
-        frequencyKnob->getTextFromValue(knobValue);
-        frequencyKnob->setTextValueSuffix("kHz");
-    }
-    else
-    {
-        frequencyKnob->setTextValueSuffix("Hz");
+        // Update text
+        frequencyKnob.getTextFromValue(frequencyKnob.getValue());
+        // Update the processor's frequency
+        *processor.frequency = frequencyKnob.getValue();
     }
 }
 
 void LpfilterAudioProcessorEditor::sliderDragEnded(Slider* slider)
 {
-    
+    if (slider == &frequencyKnob)
+        processor.frequency->endChangeGesture();
 }
 
 
@@ -127,7 +125,7 @@ void LpfilterAudioProcessorEditor::resized()
     
     /* Frequency knob */
     //auto knobBounds = boundsToDivide;
-    frequencyKnob->setBounds(boundsToDivide.removeFromTop(80));
+    frequencyKnob.setBounds(boundsToDivide.removeFromTop(80));
     boundsToDivide.removeFromTop(10);
         
     /* Bypass button */
@@ -151,7 +149,9 @@ void LpfilterAudioProcessorEditor::updateComponents()
         filterModeBox.setSelectedItemIndex(newFilterType);
     
     /* Frequency knob */
-   
+    auto newFrequency = processor.frequency->get();
+    if (newFrequency != frequencyKnob.getValue())
+        frequencyKnob.setValue(newFrequency);
     
 }
 

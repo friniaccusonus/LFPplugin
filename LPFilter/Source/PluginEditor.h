@@ -18,19 +18,24 @@
 /**
 */
 
-struct KnobSlider :    public Slider
+class KnobSlider :    public Slider
 {
-    KnobSlider(){}
-    
+public:
+    KnobSlider()
+    {
+        setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+        setRotaryParameters(5*M_PI_4, 11*M_PI_4, true);
+    }
+
     String getTextFromValue (double value) override
     {
         if (value > 999)
         {
             auto newValue = value / 1000;
-            return String (newValue, getNumDecimalPlacesToDisplay()) + " " +getTextValueSuffix();
+            return String (newValue, 0) + " "+ "k"+getTextValueSuffix();
         }
         else
-            return String (value) + " " + getTextValueSuffix();
+            return String (value,0) + " " + getTextValueSuffix();
     }
 };
 
@@ -64,7 +69,7 @@ private:
     
     ToggleButton bypassButton;
     ComboBox filterModeBox;
-    ScopedPointer<KnobSlider> frequencyKnob;
+    KnobSlider frequencyKnob;
     
     Label filterModeLabel;
     Label frequencyLabel;
