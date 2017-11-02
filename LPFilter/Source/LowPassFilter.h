@@ -14,39 +14,50 @@
 class LowPassFilter
 {
 public:
-    enum class filterType
-    : int
+    enum class FilterMode
+    :int
     {
-        juceDspModules = 0,
-        vfLibrary = 1,
-        customFilter = 2,
+        JuceDspModules = 0,
+        VFLibrary = 1
     };
     
-    LowPassFilter (AudioProcessor& processor);
+    LowPassFilter();
     ~LowPassFilter();
     
-    void setup();
-    void prepareFilter(double sampleRate, int samplesPerBlock, int filterMode);
-    void process(AudioSampleBuffer& bufferToProcess, int filterMode);
-    void updateFilterParameters();
-    void updateFilterType();
+    void filterSetup(FilterMode filterMode, float sampleRate, int numChannels);
+    
+    void setFilterMode(FilterMode filterMode);
+    
+    FilterMode getFilterMode();
+    
+    void setCutoffFrequency(float cutoffFrequency);
+    
+    float getCutoffFrequency();
+    
+    void setQFactor(float qFactor);
+    
+    float getQFactor();
+    
+    void setFilterOrder(int filterOrder);
+    
+    int getFilterOrder();
+    
+    
+    /** Processing is in-place
+     */
+    void process(AudioSampleBuffer& buffer);
+    
 private:
-    AudioProcessor& activeProcessor;
-    float frequencyParameter;
-    float previousFrequency;
+    void calculateFilterCoefficients();
     
-    void juceDspProcess(AudioSampleBuffer& processBuffer) noexcept;
-    void vfLibraryProcess(AudioSampleBuffer& processBuffer) noexcept;
-    void customFilterProcess(AudioSampleBuffer& processBuffer) noexcept;
+    int numChannels;
+    FilterMode filterMode;
+    int   filterOrder;
+    float sampleRate;
+    float cutoffFrequency;
     
-    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
     ScopedPointer<Dsp::Filter> lpfDspLib;
-    
-    IIRCoefficients      iirCoef;
-    Dsp::Params paramsDsp;
-    
-    AudioSampleBuffer previousBuffer;
-    AudioSampleBuffer filteredBuffer;
 };
+
 
 #endif /* LowPassFilter_h */

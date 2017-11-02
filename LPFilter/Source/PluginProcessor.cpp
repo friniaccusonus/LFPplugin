@@ -104,7 +104,7 @@ void LpfilterAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    lpFilter->prepareFilter(sampleRate, samplesPerBlock, mode->getIndex());
+    //lpFilter->prepareFilter(sampleRate, samplesPerBlock, mode->getIndex());
 }
 
 
@@ -151,11 +151,11 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     // Update frequency parameter
     if (previousFrequency != *frequency)
-        lpFilter->updateFilterParameters();
+        //lpFilter->updateFilterParameters();
     
     if (! *bypass)
     {
-        lpFilter->process(ioBuffer, mode->getIndex());
+        //lpFilter->process(ioBuffer, mode->getIndex());
         
         // Apply gain
         ioBuffer.applyGain (*gain);

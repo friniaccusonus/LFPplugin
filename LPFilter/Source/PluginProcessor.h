@@ -67,9 +67,9 @@ public:
     ScopedPointer<LowPassFilter> lpFilter;
 private:
     
-    void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
-    void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
-    void customProcess (AudioSampleBuffer& buffer) noexcept;
+    //void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
+    //void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
+    //void customProcess (AudioSampleBuffer& buffer) noexcept;
     
     //==============================================================================
     
