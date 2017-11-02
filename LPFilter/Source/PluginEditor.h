@@ -70,9 +70,11 @@ private:
     ToggleButton bypassButton;
     ComboBox filterModeBox;
     KnobSlider frequencyKnob;
+    Slider gainSlider;
     
     Label filterModeLabel;
     Label frequencyLabel;
+    Label gainLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessorEditor)
 };
