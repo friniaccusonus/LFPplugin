@@ -24,9 +24,8 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     filterModeLabel.attachToComponent(&filterModeBox, true);
     
     addAndMakeVisible(filterModeBox);
-    String list[3] = {"JUCE", "VF", "Custom"};      // Creates the choices list
-    filterModeBox.addItemList(StringArray(list, 3), 1);
-    filterModeBox.setSelectedId(1);
+    filterModeBox.addItemList(processor.mode->choices, 1);
+    filterModeBox.setSelectedId(processor.mode->getIndex()+1, dontSendNotification);
     filterModeBox.addListener(this);
     
     /* Add frequency knob and it's label */
@@ -70,9 +69,14 @@ void LpfilterAudioProcessorEditor::buttonClicked(Button* button)
 
 void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 {
+    // Update parameters from UI
+    
     if (comboBox == &filterModeBox)
     {
-        *processor.mode = filterModeBox.getSelectedItemIndex();
+        int index = filterModeBox.getSelectedItemIndex(); // values = 0 ,1, 2
+        
+        *processor.mode = index;
+        
     }
 }
 
@@ -137,22 +141,22 @@ void LpfilterAudioProcessorEditor::resized()
 
 void LpfilterAudioProcessorEditor::updateComponents()
 {
-    // Update components during automation
-    /* Bypass Button */
+    // Update components during automation (update UI from parameters)
+    // Bypass Button
     const bool newButtonValue = *processor.bypassParam;
     if (newButtonValue != bypassButton.getToggleState())
         bypassButton.setToggleState( newButtonValue, dontSendNotification);
     
-    /* Drop-down menu */
-    auto newFilterType = processor.mode->getIndex();
-    if (newFilterType != filterModeBox.getSelectedItemIndex())
-        filterModeBox.setSelectedItemIndex(newFilterType);
+    // Drop down menu
+    float newFilterModeValue = *processor.mode;
+    if (newFilterModeValue != filterModeBox.getSelectedItemIndex())
+        filterModeBox.setSelectedItemIndex(newFilterModeValue, dontSendNotification);
     
-    /* Frequency knob */
+    // Frequency knob
     auto newFrequency = processor.frequency->get();
     if (newFrequency != frequencyKnob.getValue())
         frequencyKnob.setValue(newFrequency);
-    
+
 }
 
 void LpfilterAudioProcessorEditor::timerCallback()
