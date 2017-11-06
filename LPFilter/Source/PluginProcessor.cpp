@@ -104,7 +104,8 @@ void LpfilterAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    //lpFilter->prepareFilter(sampleRate, samplesPerBlock, mode->getIndex());
+    lpFilter->filterSetup(sampleRate, getMainBusNumInputChannels(), samplesPerBlock);
+    lpFilter->setFilterParameters(LowPassFilter::FilterMode::JuceDspModules, 1, *frequency, 1.25);
 }
 
 
@@ -155,7 +156,7 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     if (! *bypass)
     {
-        //lpFilter->process(ioBuffer, mode->getIndex());
+        lpFilter->process(ioBuffer);
         
         // Apply gain
         ioBuffer.applyGain (*gain);

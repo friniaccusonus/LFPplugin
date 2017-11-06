@@ -88,23 +88,26 @@ void LowPassFilter::getCoefficients()
     filterCoeffs = dsp::IIR::Coefficients<float> (b0, b1, b2, a0, a1, a2);
 }
 
-void LowPassFilter::juceProcess (AudioSampleBuffer buffer)
+void LowPassFilter::juceProcess (AudioSampleBuffer ioBuffer)
 {
-    juce::dsp::AudioBlock<float> block (buffer);
-    for (int iOrder = 0; iOrder<fOrder; iOrder++)
+    dsp::AudioBlock<float> ioBlock (ioBuffer);
+    for (int iOrder = 0; iOrder < fOrder; ++iOrder)
     {
         // ! output buffer becomes input buffer !
-        //lpfJuce.process (bufferToProcess);
+        lpfJuce.process (dsp::ProcessContextReplacing<float> (ioBlock));
+        
     }
 }
 
 void LowPassFilter::vfProcess (AudioSampleBuffer buffer)
 {
-    for (int iOrder = 0; iOrder<fOrder; iOrder++)
+    for (int iOrder = 0; iOrder<fOrder; ++iOrder)
     {
         //lpfVfLib->process (bufferToProcess);
     }
 }
+
+
 
 void LowPassFilter::setFilterMode(FilterMode filterMode)
 {
