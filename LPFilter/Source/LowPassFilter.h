@@ -24,7 +24,10 @@ public:
     LowPassFilter();
     ~LowPassFilter();
     
-    void filterSetup(FilterMode filterMode, float sampleRate, int numChannels);
+    
+    void filterSetup( float sampleRate, int numChannels, int numSamples);
+    
+    void setFilterParameters (FilterMode FilterMode, int filterOrder, float cutoffFrequency, float qValue);
     
     void setFilterMode(FilterMode filterMode);
     
@@ -34,30 +37,43 @@ public:
     
     float getCutoffFrequency();
     
-    void setQFactor(float qFactor);
+    void setQValue(float qValue);
     
-    float getQFactor();
+    float getQValue();
     
     void setFilterOrder(int filterOrder);
     
     int getFilterOrder();
     
+    void setSampleRate(float sampleRate);
     
+    float getSampleRate();
+    
+
     /** Processing is in-place
      */
-    void process(AudioSampleBuffer& buffer);
+    void process(AudioSampleBuffer& bufferToProcess);
     
 private:
-    void calculateFilterCoefficients();
+
+    void getCoefficients();
+    void juceProcess (AudioSampleBuffer buffer);
+    void vfProcess (AudioSampleBuffer buffer);
     
     int numChannels;
-    FilterMode filterMode;
-    int   filterOrder;
-    float sampleRate;
-    float cutoffFrequency;
+    FilterMode fMode;
+    int   fOrder;
+    float fs;
+    float fc;
+    float q;
+    dsp::IIR::Coefficients<float> filterCoeffs;
+    Dsp::Params parameters;
     
-    ScopedPointer<Dsp::Filter> lpfDspLib;
+    Dsp::RBJ::LowPass baseFilter;
+    ScopedPointer<Dsp::Filter> lpfVfLib;
+    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
 };
 
 
 #endif /* LowPassFilter_h */
+
