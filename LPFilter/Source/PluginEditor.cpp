@@ -21,6 +21,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     /* Add bypass button */
     addAndMakeVisible (bypassButton);
     bypassButton.addListener(this);
+    bypassButton.addMouseListener(this, false);
     bypassButton.setButtonText(processor.bypassParam->name);
     
     /* Adding filter mode drop-down menu and it's label*/
@@ -32,6 +33,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     filterModeBox.addItemList(processor.mode->choices, 1);
     filterModeBox.setSelectedId(processor.mode->getIndex()+1, dontSendNotification);
     filterModeBox.addListener(this);
+    filterModeBox.addMouseListener(this, false);
     
     /* Add frequency knob and it's label */
     addAndMakeVisible(frequencyLabel);
@@ -56,7 +58,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     gainSlider.addListener(this);
     gainSlider.setRange(processor.gaindB->range.start, processor.gaindB->range.end, 1.0);
     gainSlider.setTextValueSuffix("dB");
-    
+
     updateComponents();
     
     // Make sure that before the constructor has finished, you've set the
@@ -93,6 +95,30 @@ void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
     }
 }
 
+void LpfilterAudioProcessorEditor::mouseDown(const MouseEvent &event)
+{
+    if (event.eventComponent == &filterModeBox)
+    {
+        processor.mode->beginChangeGesture();
+    }
+    else if (event.eventComponent == &bypassButton)
+    {
+        processor.bypassParam->beginChangeGesture();
+    }
+}
+
+void LpfilterAudioProcessorEditor::mouseUp(const MouseEvent &event) 
+{
+    if (event.eventComponent == &filterModeBox)
+    {
+        processor.mode->endChangeGesture();
+    }
+    else if (event.eventComponent == &bypassButton)
+    {
+        processor.bypassParam->endChangeGesture();
+    }
+}
+
 void LpfilterAudioProcessorEditor::sliderDragStarted (Slider* slider)
 {
     if (slider == &frequencyKnob)
@@ -109,8 +135,6 @@ void LpfilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
     if (slider == &frequencyKnob)
     {
-        // Update text
-        frequencyKnob.getTextFromValue(frequencyKnob.getValue());
         // Update the processor's frequency
         *processor.frequency = frequencyKnob.getValue();
     }
@@ -147,12 +171,14 @@ void LpfilterAudioProcessorEditor::resized()
     // subcomponents in your editor..
     
     auto boundsToDivide = getLocalBounds().reduced(20);
-    //boundsToDivide.removeFromTop(30);
-    boundsToDivide.removeFromLeft(50);
+
     // Bypass button
-    //bypassButton.setSize(80, boundsToDivide.removeFromTop(30).getHeight());
     bypassButton.setBounds(boundsToDivide.removeFromTop(30));
     boundsToDivide.removeFromTop(15);
+
+    boundsToDivide.removeFromRight(20);
+    boundsToDivide.removeFromLeft(100);
+    filterModeBox.setBounds(boundsToDivide.removeFromTop(25)); // Removes strip, reduces the rectangle and returns the strip
     
     // Gain slider
     auto gainBounds = boundsToDivide.removeFromRight(60);
