@@ -27,6 +27,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     filterModeBox.addItemList(processor.mode->choices, 1);
     filterModeBox.setSelectedId(processor.mode->getIndex()+1, dontSendNotification);
     filterModeBox.addListener(this);
+    filterModeBox.addMouseListener(this, false);
     
     /* Add frequency knob and it's label */
     addAndMakeVisible(frequencyLabel);
@@ -42,6 +43,7 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     /* Add bypass button */
     addAndMakeVisible (bypassButton);
     bypassButton.addListener(this);
+    bypassButton.addMouseListener(this, false);
     bypassButton.setButtonText(processor.bypassParam->name);
     
     updateComponents();
@@ -80,6 +82,30 @@ void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
     }
 }
 
+void LpfilterAudioProcessorEditor::mouseDown(const MouseEvent &event)
+{
+    if (event.eventComponent == &filterModeBox)
+    {
+        processor.mode->beginChangeGesture();
+    }
+    else if (event.eventComponent == &bypassButton)
+    {
+        processor.bypassParam->beginChangeGesture();
+    }
+}
+
+void LpfilterAudioProcessorEditor::mouseUp(const MouseEvent &event) 
+{
+    if (event.eventComponent == &filterModeBox)
+    {
+        processor.mode->endChangeGesture();
+    }
+    else if (event.eventComponent == &bypassButton)
+    {
+        processor.bypassParam->endChangeGesture();
+    }
+}
+
 void LpfilterAudioProcessorEditor::sliderDragStarted (Slider* slider)
 {
     if (slider == &frequencyKnob)
@@ -90,8 +116,6 @@ void LpfilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
     if (slider == &frequencyKnob)
     {
-        // Update text
-        frequencyKnob.getTextFromValue(frequencyKnob.getValue());
         // Update the processor's frequency
         *processor.frequency = frequencyKnob.getValue();
     }
@@ -120,7 +144,6 @@ void LpfilterAudioProcessorEditor::resized()
     /* Drop-down menu */
     auto boundsToDivide = getLocalBounds().reduced(20);
     auto newBounds = boundsToDivide;
-    //auto modeBoxBounds = boundsToDivide;
     boundsToDivide.removeFromRight(20);
     boundsToDivide.removeFromLeft(100);
     filterModeBox.setBounds(boundsToDivide.removeFromTop(25)); // Removes strip, reduces the rectangle and returns the strip
@@ -128,7 +151,6 @@ void LpfilterAudioProcessorEditor::resized()
     boundsToDivide.removeFromTop(10);
     
     /* Frequency knob */
-    //auto knobBounds = boundsToDivide;
     frequencyKnob.setBounds(boundsToDivide.removeFromTop(80));
     boundsToDivide.removeFromTop(10);
         

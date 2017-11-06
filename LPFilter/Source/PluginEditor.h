@@ -24,7 +24,6 @@ public:
     KnobSlider()
     {
         setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-        setRotaryParameters(5*M_PI_4, 11*M_PI_4, true);
     }
 
     String getTextFromValue (double value) override
@@ -59,6 +58,8 @@ private:
     void sliderDragStarted (Slider*) override;
     void sliderValueChanged(Slider*) override;
     void sliderDragEnded(Slider*) override;
+    void mouseDown(const MouseEvent &event) override;
+    void mouseUp(const MouseEvent &event) override;
     void timerCallback() override;
     void updateComponents();
     
