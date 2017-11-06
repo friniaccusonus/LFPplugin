@@ -23,9 +23,8 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     filterModeLabel.attachToComponent(&filterModeBox, true);
     
     addAndMakeVisible(filterModeBox);
-    String list[3] = {"JUCE", "VF", "Custom"};      // Creates the choices list
-    filterModeBox.addItemList(StringArray(list, 3), 1);
-    filterModeBox.setSelectedId(1);
+    filterModeBox.addItemList(processor.mode->choices, 1);
+    filterModeBox.setSelectedId(processor.mode->getIndex()+1, dontSendNotification);
     filterModeBox.addListener(this);
     
     addAndMakeVisible (bypassButton);
@@ -57,11 +56,17 @@ void LpfilterAudioProcessorEditor::buttonClicked(Button* button)
 
 void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 {
+    // Update parameters from UI
+    
     if (comboBox == &filterModeBox)
     {
-        *processor.mode = filterModeBox.getSelectedItemIndex();
+        int index = filterModeBox.getSelectedItemIndex(); // values = 0 ,1, 2
+        
+        *processor.mode = index;
+        
     }
 }
+
 
 //==============================================================================
 void LpfilterAudioProcessorEditor::paint (Graphics& g)
@@ -92,15 +97,18 @@ void LpfilterAudioProcessorEditor::resized()
 
 void LpfilterAudioProcessorEditor::updateComponents()
 {
-    // Update components during automation
-    const bool newButtonValue = *processor.bypassParam;
-    auto newFilterType = processor.mode->getIndex();
+    // Update components during automation (update UI from parameters)
     
+    const bool newButtonValue = *processor.bypassParam;
+    float newFilterModeValue = *processor.mode;
+    
+    // Bypass Button
     if (newButtonValue != bypassButton.getToggleState())
         bypassButton.setToggleState( newButtonValue, dontSendNotification);
     
-    if (newFilterType != filterModeBox.getSelectedItemIndex())
-        filterModeBox.setSelectedItemIndex(newFilterType);
+    // Drop down menu
+    if (newFilterModeValue != filterModeBox.getSelectedItemIndex())
+        filterModeBox.setSelectedItemIndex(newFilterModeValue, dontSendNotification);
 }
 
 void LpfilterAudioProcessorEditor::timerCallback()
