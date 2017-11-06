@@ -18,6 +18,12 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
 {
     // Add components
     
+    /* Add bypass button */
+    addAndMakeVisible (bypassButton);
+    bypassButton.addListener(this);
+    bypassButton.setButtonText(processor.bypassParam->name);
+    
+    /* Adding filter mode drop-down menu and it's label*/
     addAndMakeVisible(filterModeLabel);
     filterModeLabel.setText("Filter Type", dontSendNotification);
     filterModeLabel.attachToComponent(&filterModeBox, true);
@@ -27,15 +33,35 @@ LpfilterAudioProcessorEditor::LpfilterAudioProcessorEditor (LpfilterAudioProcess
     filterModeBox.setSelectedId(processor.mode->getIndex()+1, dontSendNotification);
     filterModeBox.addListener(this);
     
-    addAndMakeVisible (bypassButton);
-    bypassButton.addListener(this);
-    bypassButton.setButtonText(processor.bypassParam->name);
+    /* Add frequency knob and it's label */
+    addAndMakeVisible(frequencyLabel);
+    frequencyLabel.setText("Frequency", dontSendNotification);
+    frequencyLabel.attachToComponent(&frequencyKnob, true);
+    
+    addAndMakeVisible(frequencyKnob);
+    frequencyKnob.addListener(this);
+    frequencyKnob.setRange(processor.frequency->range.start, processor.frequency->range.end, 1.0);
+    frequencyKnob.setTextValueSuffix("Hz");
+    frequencyKnob.setSkewFactorFromMidPoint(2000.0);
+    
+    /* Add gain slider and it's label*/
+    addAndMakeVisible(gainLabel);
+    gainLabel.setText(processor.gaindB->name, dontSendNotification);
+    gainLabel.attachToComponent(&gainSlider, false);
+    gainLabel.setJustificationType(juce::Justification::centred);
+    
+    addAndMakeVisible(gainSlider);
+    gainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    gainSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 50, 20);
+    gainSlider.addListener(this);
+    gainSlider.setRange(processor.gaindB->range.start, processor.gaindB->range.end, 1.0);
+    gainSlider.setTextValueSuffix("dB");
     
     updateComponents();
     
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (400, 250);
     
     startTimerHz (30);
 }
@@ -67,6 +93,45 @@ void LpfilterAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
     }
 }
 
+void LpfilterAudioProcessorEditor::sliderDragStarted (Slider* slider)
+{
+    if (slider == &frequencyKnob)
+    {
+        processor.frequency->beginChangeGesture();
+    }
+    else if (slider == &gainSlider)
+    {
+        processor.gaindB->beginChangeGesture();
+    }
+}
+
+void LpfilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
+{
+    if (slider == &frequencyKnob)
+    {
+        // Update text
+        frequencyKnob.getTextFromValue(frequencyKnob.getValue());
+        // Update the processor's frequency
+        *processor.frequency = frequencyKnob.getValue();
+    }
+    else if (slider == &gainSlider)
+    {
+        *processor.gaindB = gainSlider.getValue();
+    }
+}
+
+void LpfilterAudioProcessorEditor::sliderDragEnded(Slider* slider)
+{
+    if (slider == &frequencyKnob)
+    {
+        processor.frequency->endChangeGesture();
+    }
+    else if (slider == &gainSlider)
+    {
+        processor.gaindB->endChangeGesture();
+    }
+}
+
 
 //==============================================================================
 void LpfilterAudioProcessorEditor::paint (Graphics& g)
@@ -82,33 +147,47 @@ void LpfilterAudioProcessorEditor::resized()
     // subcomponents in your editor..
     
     auto boundsToDivide = getLocalBounds().reduced(20);
-    auto newBounds = boundsToDivide;
-    boundsToDivide.removeFromRight(20);
-    boundsToDivide.removeFromLeft(100);
-    filterModeBox.setBounds(boundsToDivide.removeFromTop(25)); // Removes strip, reduces the rectangle and returns the strip
+    //boundsToDivide.removeFromTop(30);
+    boundsToDivide.removeFromLeft(50);
+    // Bypass button
+    //bypassButton.setSize(80, boundsToDivide.removeFromTop(30).getHeight());
+    bypassButton.setBounds(boundsToDivide.removeFromTop(30));
+    boundsToDivide.removeFromTop(15);
     
-    boundsToDivide.removeFromTop(5);
+    // Gain slider
+    auto gainBounds = boundsToDivide.removeFromRight(60);
+    gainSlider.setBounds(gainBounds);
     
-    auto buttonBounds = newBounds.removeFromTop(30);
-    bypassButton.setSize(80, buttonBounds.getHeight());   // Sets button's size
-    bypassButton.setCentrePosition(newBounds.removeFromTop(50).getCentre());
+    // Drop-down menu
+    filterModeBox.setBounds(boundsToDivide.removeFromTop(25));
+    boundsToDivide.removeFromTop(35);
     
+    // Frequency knob
+    frequencyKnob.setBounds(boundsToDivide.removeFromTop(80));
 }
 
 void LpfilterAudioProcessorEditor::updateComponents()
 {
     // Update components during automation (update UI from parameters)
-    
-    const bool newButtonValue = *processor.bypassParam;
-    float newFilterModeValue = *processor.mode;
-    
     // Bypass Button
+    const bool newButtonValue = *processor.bypassParam;
     if (newButtonValue != bypassButton.getToggleState())
         bypassButton.setToggleState( newButtonValue, dontSendNotification);
     
     // Drop down menu
+    float newFilterModeValue = *processor.mode;
     if (newFilterModeValue != filterModeBox.getSelectedItemIndex())
         filterModeBox.setSelectedItemIndex(newFilterModeValue, dontSendNotification);
+    
+    // Frequency knob
+    auto newFrequency = processor.frequency->get();
+    if (newFrequency != frequencyKnob.getValue())
+        frequencyKnob.setValue(newFrequency);
+
+    // Gain slider
+    auto newGain = processor.gaindB->get();
+    if (newGain != gainSlider.getValue())
+        gainSlider.setValue(newGain);
 }
 
 void LpfilterAudioProcessorEditor::timerCallback()

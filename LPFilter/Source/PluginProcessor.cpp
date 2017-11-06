@@ -28,7 +28,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
 #endif
 {
     // Add parameters
-    addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
+    addParameter(gaindB = new AudioParameterFloat("gain", "Gain", -20.0f, 20.0f, 0.0f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
     addParameter(mode = new AudioParameterChoice ("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
     addParameter(bypassParam = new AudioParameterBool("bypass", "Bypass", false));
@@ -205,8 +205,11 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
             jassertfalse;
         }
         
+        // Convert to simple gain
+        //float gain = *gaindB > gaindB->range.start ? std::pow ((float) 10.0, *gaindB * (float) 0.05) : 0.0f;
+        float gain = std::pow ((float) 10.0, *gaindB * (float) 0.05);
         // Apply gain
-        ioBuffer.applyGain (*gain);
+        ioBuffer.applyGain (gain);
     }
 }
 

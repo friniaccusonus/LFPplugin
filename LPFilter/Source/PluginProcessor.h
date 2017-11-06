@@ -61,7 +61,7 @@ public:
     
     //==============================================================================
     // Parameters are public, so they can be accessed by the Editor
-    AudioParameterFloat* gain;
+    AudioParameterFloat* gaindB;
     AudioParameterFloat* frequency;
     AudioParameterChoice* mode;
     AudioParameterBool* bypassParam;
