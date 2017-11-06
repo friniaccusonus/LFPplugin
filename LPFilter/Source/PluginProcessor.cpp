@@ -30,7 +30,7 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
-    addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
+    addParameter(mode = new AudioParameterChoice ("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
     addParameter(bypassParam = new AudioParameterBool("bypass", "Bypass", false));
     
 }
