@@ -62,20 +62,17 @@ public:
     AudioParameterChoice* mode;
     AudioParameterFloat* frequency;
     
-    //dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
-    
     ScopedPointer<LowPassFilter> lpFilter;
 private:
-    
-    //void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
-    //void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
-    //void customProcess (AudioSampleBuffer& buffer) noexcept;
     
     //==============================================================================
     
     float previousFrequency;
     AudioParameterFloat* gain;
     AudioParameterBool* bypass;
+    
+    int filterOrder;
+    float qValue;
     //IIRCoefficients      iirCoef;
     //Dsp::Params paramsDsp;
     

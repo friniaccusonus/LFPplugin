@@ -29,10 +29,14 @@ LpfilterAudioProcessor::LpfilterAudioProcessor()
 {
     // Add parameters
     addParameter(gain = new AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
-    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 60.f));
+    addParameter(frequency = new AudioParameterFloat("frequency", "Hz", 60.f, 10000.f, 400.f));
     addParameter(mode = new AudioParameterChoice("mode", "Mode", {"Juce DSP modules", "DSPFilters Lib", "Custom Filter"}, 0));
     addParameter(bypass = new AudioParameterBool("bypas", "Bypass", false));
     
+    // Constant filter parameters
+    filterOrder = 1;
+    qValue = 1.25;
+
 }
 
 LpfilterAudioProcessor::~LpfilterAudioProcessor()
@@ -104,8 +108,10 @@ void LpfilterAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void LpfilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    lpFilter = new LowPassFilter();
     lpFilter->filterSetup(sampleRate, getMainBusNumInputChannels(), samplesPerBlock);
-    lpFilter->setFilterParameters(LowPassFilter::FilterMode::JuceDspModules, 1, *frequency, 1.25);
+    lpFilter->setFilterParameters(LowPassFilter::FilterMode::JuceDspModules, filterOrder, *frequency, qValue);
+    
 }
 
 
@@ -151,8 +157,11 @@ void LpfilterAudioProcessor::processBlock (AudioSampleBuffer& ioBuffer, MidiBuff
     
     
     // Update frequency parameter
-    if (previousFrequency != *frequency)
-        //lpFilter->updateFilterParameters();
+    if ( (previousFrequency != *frequency) || (lpFilter->getFilterMode() != (LowPassFilter::FilterMode) mode->getIndex()) )
+    {
+        lpFilter->setFilterParameters ((LowPassFilter::FilterMode) mode->getIndex(),  filterOrder, *frequency, qValue);
+        previousFrequency = *frequency;
+    }
     
     if (! *bypass)
     {

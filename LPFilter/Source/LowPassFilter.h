@@ -18,7 +18,8 @@ public:
     :int
     {
         JuceDspModules = 0,
-        VFLibrary = 1
+        VFLibrary = 1,
+        Custom = 2
     };
     
     LowPassFilter();
@@ -49,6 +50,9 @@ public:
     
     float getSampleRate();
     
+    void setNumChannels (int numChannels);
+    
+    int getNumChannels();
 
     /** Processing is in-place
      */
@@ -56,11 +60,13 @@ public:
     
 private:
 
-    void getCoefficients();
-    void juceProcess (AudioSampleBuffer buffer);
-    void vfProcess (AudioSampleBuffer buffer);
+    void calculateCoefficients();
+    void juceProcess (AudioSampleBuffer& ioBuffer);
+    void vfProcess (AudioSampleBuffer& ioBuffer);
+    void customProcess (AudioSampleBuffer& ioBuffer);
+    void setCustomCoeffiecients();
     
-    int numChannels;
+    int nChannels;
     FilterMode fMode;
     int   fOrder;
     float fs;
@@ -72,6 +78,10 @@ private:
     Dsp::RBJ::LowPass baseFilter;
     ScopedPointer<Dsp::Filter> lpfVfLib;
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
+    IIRCoefficients customCoefficients;
+    
+    AudioSampleBuffer filteredBuffer;
+    AudioSampleBuffer previousBuffer;
 };
 
 
