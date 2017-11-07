@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "DspFilters/Dsp.h"
+#include "LowPassFilter.h"
 
 //==============================================================================
 /**
@@ -57,6 +58,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     //==============================================================================
+
     void updateParameters();
     
     //==============================================================================
@@ -66,24 +68,15 @@ public:
     AudioParameterChoice* mode;
     AudioParameterBool* bypassParam;
 
+    ScopedPointer<LowPassFilter> lpFilter;
 private:
-    
-    void juceModulesProcess (AudioSampleBuffer& buffer) noexcept;
-    void dspFiltersProcess (AudioSampleBuffer& buffer) noexcept;
-    void customProcess (AudioSampleBuffer& buffer) noexcept;
     
 
     //==============================================================================
     
     float previousFrequency;
-    IIRCoefficients      iirCoef;
-    Dsp::Params paramsDsp;
-    
-    dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lpfJuce;
-    ScopedPointer<Dsp::Filter> lpfDspLib;
-    
-    AudioSampleBuffer prevBuffer;
-    AudioSampleBuffer filteredBuffer;
-    
+    int filterOrder;
+    float qValue;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };
