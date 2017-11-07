@@ -59,27 +59,24 @@ public:
     
     //==============================================================================
 
-    AudioParameterChoice* mode;
-    AudioParameterFloat* frequency;
+    void updateParameters();
     
+    //==============================================================================
+    // Parameters are public, so they can be accessed by the Editor
+    AudioParameterFloat* gaindB;
+    AudioParameterFloat* frequency;
+    AudioParameterChoice* mode;
+    AudioParameterBool* bypassParam;
+
     ScopedPointer<LowPassFilter> lpFilter;
 private:
     
+
     //==============================================================================
     
     float previousFrequency;
-    AudioParameterFloat* gain;
-    AudioParameterBool* bypass;
-    
     int filterOrder;
     float qValue;
-    //IIRCoefficients      iirCoef;
-    //Dsp::Params paramsDsp;
-    
-    //ScopedPointer<Dsp::Filter> lpfDspLib;
-    
-    //AudioSampleBuffer prevBuffer;
-    //AudioSampleBuffer filteredBuffer;
-    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LpfilterAudioProcessor)
 };
