@@ -1,0 +1,17 @@
+# azure-pipelines.yml
+jobs:
+- job: MacOS
+  pool:
+    vmImage: 'macOS-10.13'
+  steps:
+    - bash: |
+        echo Hello from macOS Agent!
+        pwd
+
+- job: Windows
+  pool:
+    vmImage: 'vs2015-win2012r2'
+  steps:
+    - bash: |
+        echo Hello from windows Agent!
+        pwd
