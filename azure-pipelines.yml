@@ -14,7 +14,15 @@ jobs:
         pwd
         echo clone JuceLibrary v5.1.2
         git clone https://github.com/WeAreROLI/JUCE.git 5.1.2
-        cd 5.2.1
+        cd 5.1.2
+        pwd
+        echo Build Projucer in Xcode
+    - task: Xcode@5
+      inputs:
+        actions: 'build'
+        configuration: 'Debug'
+        xcWorkspacePath: '../../../../../../SDKs/JuceLibrary/5.1.2/extras/Projucer/Builds/MacOSX/Projucer.xcodeproject'
+        xcodeVersion: '9'
 
 - job: Windows
   pool:
@@ -24,10 +32,11 @@ jobs:
         echo Hello from windows Agent!
         pwd
         echo create SDKs folder
-        mkdir C:\SDKs\
-        mkdir C:\SDKs\JuceLibrary
-        cd C:\SDKs\JuceLibrary
+        mkdir /c/SDKs/
+        mkdir /c/SDKs/JuceLibrary
+        cd /c/SDKs/JuceLibrary
         pwd
         echo clone JuceLibrary v5.1.2
         git clone https://github.com/WeAreROLI/JUCE.git 5.1.2
-        cd 5.2.1
+        cd 5.1.2
+        pwd
