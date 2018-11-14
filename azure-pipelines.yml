@@ -8,8 +8,11 @@ jobs:
         echo Hello from macOS Agent!
         pwd
         echo create SDKs folder
-        mkdir ~/SDKs
-        cd ~/SDKs
+        mkdir ~/SDKs/JuceLibrary
+        cd ~/SDKs/JuceLibrary
+        pwd
+        echo clone JuceLibrary v5.1.2
+        git clone https://github.com/WeAreROLI/JUCE.git 5.1.2
 
 - job: Windows
   pool:
@@ -19,5 +22,8 @@ jobs:
         echo Hello from windows Agent!
         pwd
         echo create SDKs folder
-        mkdir C:\SDKs
-        cd C:\SDKs
+        mkdir C:\SDKs\JuceLibrary
+        cd C:\SDKs\JuceLibrary
+        pwd
+        echo clone JuceLibrary v5.1.2
+        git clone https://github.com/WeAreROLI/JUCE.git 5.1.2
