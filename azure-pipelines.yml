@@ -21,7 +21,7 @@ jobs:
       inputs:
         actions: 'build'
         configuration: 'Debug'
-        xcWorkspacePath: '../../../../../SDKs/JuceLibrary/5.1.2/extras/Projucer/Builds/MacOSX/Projucer.xcodeproject'
+        xcWorkspacePath: '../../../../../SDKs/JuceLibrary/5.1.2/extras/Projucer/Builds/MacOSX/Projucer.xcodeproj'
         xcodeVersion: '9'
 
 - job: Windows
