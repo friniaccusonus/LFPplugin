@@ -1,6 +1,6 @@
 # LPFplugin
 
-Trying out CI!
+Trying out CI nowwwwww!
 
 _LPFplugin_ is a simple audio plugin that implements a Low-Pass filter using three methods:
 
