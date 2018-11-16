@@ -1,6 +1,6 @@
 # LPFplugin
 
-Trying out CI nowww!
+[![Build Status](http://marvintherobot.westeurope.cloudapp.azure.com/job/TestJob_macOS/badge/icon)](http://marvintherobot.westeurope.cloudapp.azure.com/job/TestJob_macOS/)
 
 _LPFplugin_ is a simple audio plugin that implements a Low-Pass filter using three methods:
 
