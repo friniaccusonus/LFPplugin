@@ -1,5 +1,7 @@
 # LPFplugin
 
+Trying out CI!
+
 _LPFplugin_ is a simple audio plugin that implements a Low-Pass filter using three methods:
 
 * the JUCE DSP modules
